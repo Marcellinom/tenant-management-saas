@@ -1,5 +1,5 @@
 resource "google_cloud_run_service" "compute" {
-  name     = "compute-${var.compute_name}"
+  name     = "${var.tenant_name}-sample-saas-product-compute"
   location = "asia-southeast2"
 
   template {

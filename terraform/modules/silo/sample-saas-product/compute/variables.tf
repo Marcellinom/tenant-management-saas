@@ -1,7 +1,6 @@
-variable "compute_name" {
-  description = "compute instance name"
+variable "tenant_name" {
+  description = "nama tenant nya"
 }
-
 variable "db_host" {
   description = "database storage host"
 }
