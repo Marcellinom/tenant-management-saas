@@ -6,13 +6,14 @@ import (
 	"os"
 	"tenant_management/internal"
 	"tenant_management/pkg"
+	"tenant_management/pkg/gcp"
 )
 
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Panic("Error loading .env file")
 	}
-
+	gcp.CreateCloudRunSilo()
 	engine_cfg := pkg.DefaultEngineConfig()
 	engine, err := pkg.SetupWebEngine(engine_cfg)
 	if err != nil {
