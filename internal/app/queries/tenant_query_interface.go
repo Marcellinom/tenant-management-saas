@@ -1,7 +1,9 @@
 package queries
 
-import "tenant_management/internal/domain/valueobjects"
+import (
+	"github.com/google/uuid"
+)
 
 type TenantQueryInterface interface {
-	Find(id valueobjects.TenantId)
+	Find(id uuid.UUID)
 }
