@@ -7,5 +7,5 @@ variable "password" {
 }
 
 variable "database_driver" {
-  default = "driver databasenya dan versinya dalam caps dan cammel case, contoh: POSTGRES_15"
+  description = "driver databasenya dan versinya dalam caps dan cammel case, contoh: POSTGRES_15"
 }

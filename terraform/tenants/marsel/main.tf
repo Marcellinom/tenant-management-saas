@@ -7,6 +7,7 @@ module "storage" {
 
   tenant_name = local.tenant_name
   password = local.tenant_password
+  database_driver = local.gcp_database_driver
 }
 
 module "database" {
