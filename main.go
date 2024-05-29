@@ -6,14 +6,26 @@ import (
 	"os"
 	"tenant_management/internal"
 	"tenant_management/pkg"
-	"tenant_management/pkg/gcp"
 )
 
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Panic("Error loading .env file")
 	}
-	gcp.CreateCloudRunSilo()
+
+	//tenant_id := "marsel"
+	//gcs_bucket := gcp.Bucket("saas-tf-config", "tenants")
+	//terraform.New("E:\\1kuliah\\TA\\code\\tenant-management\\terraform").
+	//	Tenant(
+	//		tenant_id,
+	//		"list-foto-product",
+	//		terraform.SILO,
+	//		tfexec.Var("tenant_id=marsel")).
+	//	UseBackend(gcs_bucket).
+	//	Create()
+	//
+	//os.Exit(1)
+
 	engine_cfg := pkg.DefaultEngineConfig()
 	engine, err := pkg.SetupWebEngine(engine_cfg)
 	if err != nil {
