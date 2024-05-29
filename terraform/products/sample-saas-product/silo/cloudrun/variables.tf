@@ -1,5 +1,5 @@
-variable "tenant_name" {
-  description = "nama tenant nya"
+variable "tenant_id" {
+  description = "id tenant nya (uuid)"
 }
 variable "db_host" {
   description = "database storage host"

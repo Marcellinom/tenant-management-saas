@@ -1,6 +1,7 @@
 resource "google_sql_database_instance" "storage" {
   # Information
-  name             = "${var.tenant_name}-sample-saas-product-database"
+  count = var.required
+  name             = "${var.tenant_id}-2-sample-saas-product-database"
   database_version = var.database_driver
   region           = "asia-southeast2"
 

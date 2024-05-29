@@ -1,5 +1,5 @@
-resource "google_cloud_run_service" "compute" {
-  name     = "${var.tenant_name}-sample-saas-product-compute"
+resource "google_cloud_run_service" "cloudrun" {
+  name     = "${var.tenant_id}-sample-saas-product-compute"
   location = "asia-southeast2"
 
   template {
@@ -41,8 +41,8 @@ resource "google_cloud_run_service" "compute" {
 }
 
 resource "google_cloud_run_service_iam_member" "run_all_users" {
-  service  = google_cloud_run_service.compute.name
-  location = google_cloud_run_service.compute.location
+  service  = google_cloud_run_service.cloudrun.name
+  location = google_cloud_run_service.cloudrun.location
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
