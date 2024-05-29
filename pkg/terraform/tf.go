@@ -134,6 +134,7 @@ func (t *TenantConfig) Create() {
 }
 
 // TODO: implement tfexec plan buat ngatur perubahan state nya
+// idealnya replace semua config tenant kecuali state files
 
 func tenantConfigExists(path string) (bool, error) {
 	if !strings.Contains(path, "main.tf") {
