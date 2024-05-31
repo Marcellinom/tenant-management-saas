@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"tenant_management/internal"
 	"tenant_management/pkg"
+	"tenant_management/pkg/terraform"
 )
 
 func main() {
@@ -13,19 +16,21 @@ func main() {
 		log.Panic("Error loading .env file")
 	}
 
-	//tenant_id := "marsel"
+	tenant_id := "iyok"
 	//gcs_bucket := gcp.Bucket("saas-tf-config", "tenants")
-	//terraform.New("E:\\1kuliah\\TA\\code\\tenant-management\\terraform").
-	//	Tenant(
-	//		tenant_id,
-	//		"list-foto-product",
-	//		terraform.SILO,
-	//		tfexec.Var("tenant_id=marsel")).
-	//	UseBackend(gcs_bucket).
-	//	Create()
-	//
-	//os.Exit(1)
+	terraform.New("E:\\1kuliah\\TA\\code\\tenant-management\\terraform").
+		Tenant(
+			tenant_id,
+			"list-foto-product",
+			terraform.SILO,
+			*tfexec.Var(fmt.Sprintf("tenant_id=%s", tenant_id)),
+		).
+		UseBackend(terraform.BuiltinBackend("saas-tf-config", "tenants")).
+		//UseBackend(gcs_bucket).
+		Plan()
+}
 
+func startApp() {
 	engine_cfg := pkg.DefaultEngineConfig()
 	engine, err := pkg.SetupWebEngine(engine_cfg)
 	if err != nil {
