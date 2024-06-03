@@ -1,10 +1,10 @@
 package internal
 
 import (
+	"github.com/Marcellinom/tenant-management-saas/internal/presentation"
+	"github.com/Marcellinom/tenant-management-saas/internal/presentation/controllers"
+	"github.com/Marcellinom/tenant-management-saas/pkg"
 	"gorm.io/gorm"
-	"tenant_management/internal/presentation"
-	"tenant_management/internal/presentation/controllers"
-	"tenant_management/pkg"
 )
 
 func RegisterApplication(app *pkg.Application) {

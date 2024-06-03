@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Marcellinom/tenant-management-saas/pkg/fs"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
-	"tenant_management/pkg/fs"
 )
 
 func (t *TenantConfig) Plan() {
@@ -27,6 +27,7 @@ func (t *TenantConfig) Plan() {
 
 	// copy product configs ke tenant
 	// eg: terraform/products/product_sample/silo/
+	fmt.Println("Loading Up Product Config")
 	product_config := filepath.Join(t.tf_config.tf_products, t.product, t.deployment_type)
 	product_config_exists, err := pathExists(product_config)
 	if err != nil {
@@ -47,7 +48,7 @@ func (t *TenantConfig) Plan() {
 
 	ctx := NewTfContext(t.tenant_id, tf, t.tenant_env)
 
-	fmt.Println("Loading Up Tenant Config")
+	fmt.Println("Loading Up Tenant State")
 	// init state dari backend
 	// kalo gada ya init biasa
 	if t.tf_config.tf_backend != nil {
@@ -62,7 +63,7 @@ func (t *TenantConfig) Plan() {
 		}
 	}
 
-	fmt.Println("Applying Tenant Config")
+	fmt.Println("Planning Tenant State")
 	var buffer bytes.Buffer
 
 	// data tipe tolol, VarOption harusnya nge implement PlanOption tapi nggak

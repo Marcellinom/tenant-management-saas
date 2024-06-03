@@ -1,8 +1,8 @@
 package entities
 
 import (
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/enum"
 	"github.com/google/uuid"
-	"tenant_management/internal/domain/enum"
 )
 
 type Tenant struct {

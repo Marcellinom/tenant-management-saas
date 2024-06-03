@@ -2,11 +2,11 @@ package terraform
 
 import (
 	"fmt"
+	"github.com/Marcellinom/tenant-management-saas/pkg/fs"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"log"
 	"os"
 	"path/filepath"
-	"tenant_management/pkg/fs"
 )
 
 func (t *TenantConfig) Apply() {

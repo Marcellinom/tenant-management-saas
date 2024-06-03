@@ -1,8 +1,8 @@
 package presentation
 
 import (
-	"tenant_management/internal/presentation/controllers"
-	"tenant_management/pkg"
+	"github.com/Marcellinom/tenant-management-saas/internal/presentation/controllers"
+	"github.com/Marcellinom/tenant-management-saas/pkg"
 )
 
 func RegisterRoutes(app *pkg.Application) {
