@@ -15,6 +15,12 @@ require (
 require (
 	cloud.google.com/go v0.114.0 // indirect
 	cloud.google.com/go/iam v1.1.8 // indirect
+	github.com/coreos/go-oidc/v3 v3.10.0 // indirect
+	github.com/gin-contrib/sessions v1.0.1 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
+	github.com/gorilla/context v1.1.2 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gorilla/sessions v1.2.2 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.6.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
