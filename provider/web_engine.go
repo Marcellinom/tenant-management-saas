@@ -39,8 +39,9 @@ func DefaultEngineConfig() WebEngineConfig {
 	}
 }
 
-func (e *WebEngineConfig) UseCustomErrorHandler(handler ErrorHandler) {
+func (e *WebEngineConfig) UseCustomErrorHandler(handler ErrorHandler) WebEngineConfig {
 	e.CustomErrorHandler = handler
+	return *e
 }
 
 func SetupWebEngine(cfg WebEngineConfig) (*WebEngine, error) {

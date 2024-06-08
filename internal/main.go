@@ -1,15 +1,12 @@
 package internal
 
 import (
-	"github.com/Marcellinom/tenant-management-saas/internal/presentation/controllers"
 	"github.com/Marcellinom/tenant-management-saas/internal/presentation/routes"
 	"github.com/Marcellinom/tenant-management-saas/provider"
-	"gorm.io/gorm"
 )
 
 func RegisterApplication(app *provider.Application) {
-	db := gorm.DB{}
-	provider.Bind(app, "tenant-controller", controllers.NewTenantController(&db))
+	//provider.Bind(app, "tenant-controller", controllers.NewTenantController())
 	routes.RegisterRoutes(app)
 	routes.RegisterApis(app)
 

@@ -6,6 +6,7 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/auth"
+	"github.com/Marcellinom/tenant-management-saas/provider/errors"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/joho/godotenv"
 	"log"
@@ -37,6 +38,7 @@ func testTerraform() {
 
 func startApp() {
 	engine_cfg := provider.DefaultEngineConfig()
+	engine_cfg.UseCustomErrorHandler(errors.DefaultHandler())
 	engine, err := provider.SetupWebEngine(engine_cfg)
 	if err != nil {
 		log.Panic(err)
