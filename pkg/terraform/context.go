@@ -1,13 +1,11 @@
 package terraform
 
 import (
-	"context"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"time"
 )
 
 type TfContext struct {
-	context.Context
 	tenant_id  string
 	terraform  *tfexec.Terraform
 	tenant_env []tfexec.VarOption

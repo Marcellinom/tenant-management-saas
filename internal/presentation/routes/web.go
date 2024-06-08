@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/Marcellinom/tenant-management-saas/pkg"
+	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func RegisterRoutes(app *pkg.Application) {
+func RegisterRoutes(app *provider.Application) {
 	route := app.Engine()
 
 	route.Use(sessions.Sessions("auth-session", cookie.NewStore([]byte("secret"))))

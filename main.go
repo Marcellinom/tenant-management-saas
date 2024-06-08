@@ -3,20 +3,21 @@ package main
 import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal"
-	"github.com/Marcellinom/tenant-management-saas/pkg"
-	"github.com/Marcellinom/tenant-management-saas/pkg/auth"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
+	"github.com/Marcellinom/tenant-management-saas/provider"
+	"github.com/Marcellinom/tenant-management-saas/provider/auth"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/joho/godotenv"
 	"log"
+	"os"
 )
 
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Panic("Error loading .env file", err)
 	}
-	//startApp()
-	testTerraform()
+	startApp()
+	//testTerraform()
 }
 
 func testTerraform() {
@@ -35,29 +36,29 @@ func testTerraform() {
 }
 
 func startApp() {
-	engine_cfg := pkg.DefaultEngineConfig()
-	engine, err := pkg.SetupWebEngine(engine_cfg)
+	engine_cfg := provider.DefaultEngineConfig()
+	engine, err := provider.SetupWebEngine(engine_cfg)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	//pool_config := pkg.NewConnectionConfig(
-	//	os.Getenv("DB_CONNECTION"),
-	//	os.Getenv("DB_DRIVER"),
-	//	os.Getenv("DB_USER"),
-	//	os.Getenv("DB_PASSWORD"),
-	//	os.Getenv("DB_HOST"),
-	//	os.Getenv("DB_PORT"),
-	//	os.Getenv("DB_DATABASE"),
-	//)
-	//
-	//db_connections, err := pkg.SetupDatabase([]pkg.ConnectionConfig{
-	//	pool_config,
-	//})
+	tm_database := provider.NewConnectionConfig(
+		os.Getenv("DB_CONNECTION"),
+		os.Getenv("DB_DRIVER"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_DATABASE"),
+	)
+
+	db_connections, err := provider.SetupDatabase([]provider.ConnectionConfig{
+		tm_database,
+	})
 	if err != nil {
 		log.Panic(err)
 	}
-	app := pkg.NewApplication(engine, nil)
+	app := provider.NewApplication(engine, db_connections)
 
 	iam, err := auth.New()
 	if err != nil {

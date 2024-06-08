@@ -15,6 +15,7 @@ require (
 require (
 	cloud.google.com/go v0.114.0 // indirect
 	cloud.google.com/go/iam v1.1.8 // indirect
+	cloud.google.com/go/pubsub v1.38.0 // indirect
 	github.com/coreos/go-oidc/v3 v3.10.0 // indirect
 	github.com/gin-contrib/sessions v1.0.1 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect

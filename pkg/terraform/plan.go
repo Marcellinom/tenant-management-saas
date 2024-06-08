@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Marcellinom/tenant-management-saas/pkg/fs"
+	"github.com/Marcellinom/tenant-management-saas/provider/fs"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"io"
 	"log"

@@ -7,3 +7,10 @@ module "application" {
 
   tenant_id = var.tenant_id
 }
+
+
+terraform {
+  backend "gcs" {
+    credentials = ""
+  }
+}
