@@ -1,9 +1,14 @@
 module github.com/Marcellinom/tenant-management-saas
 
-go 1.21
+go 1.21.4
+
+toolchain go1.21.9
 
 require (
+	cloud.google.com/go/pubsub v1.38.0
 	cloud.google.com/go/storage v1.41.0
+	github.com/coreos/go-oidc/v3 v3.10.0
+	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/google/uuid v1.6.0
@@ -15,9 +20,6 @@ require (
 require (
 	cloud.google.com/go v0.114.0 // indirect
 	cloud.google.com/go/iam v1.1.8 // indirect
-	cloud.google.com/go/pubsub v1.38.0 // indirect
-	github.com/coreos/go-oidc/v3 v3.10.0 // indirect
-	github.com/gin-contrib/sessions v1.0.1 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
@@ -79,7 +81,7 @@ require (
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/oauth2 v0.20.0 // indirect
+	golang.org/x/oauth2 v0.20.0
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"log"
 	"net/http"
 	"os"
 	"reflect"
@@ -15,10 +16,15 @@ type WebEngine = gin.Engine
 type Context = gin.Context
 type H gin.H
 
+type ErrorHandler interface {
+	Handle(debugMode bool) func(ctx *Context)
+}
+
 type WebEngineConfig struct {
-	DebugMode    bool
-	Environtment string
-	Port         string
+	DebugMode          bool
+	Environtment       string
+	Port               string
+	CustomErrorHandler ErrorHandler
 }
 
 func NewWebEngineConfig(debugMode bool, environtment string, port string) WebEngineConfig {
@@ -31,6 +37,10 @@ func DefaultEngineConfig() WebEngineConfig {
 		Environtment: os.Getenv("APP_ENV"),
 		Port:         os.Getenv("APP_PORT"),
 	}
+}
+
+func (e *WebEngineConfig) UseCustomErrorHandler(handler ErrorHandler) {
+	e.CustomErrorHandler = handler
 }
 
 func SetupWebEngine(cfg WebEngineConfig) (*WebEngine, error) {
@@ -86,9 +96,10 @@ func SetupWebEngine(cfg WebEngineConfig) (*WebEngine, error) {
 			"data":    data,
 		})
 	}))
-	// TODO: buat ntar custom error
-	//r.Use(globalErrorHandler(cfg.IsDebugMode))
+	if cfg.CustomErrorHandler != nil {
+		r.Use(cfg.CustomErrorHandler.Handle(cfg.DebugMode))
+	}
 
-	// log.Println("Gin server successfully set up!")
+	log.Println("Gin server successfully set up!")
 	return r, nil
 }

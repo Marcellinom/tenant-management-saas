@@ -1,6 +1,6 @@
-package enum
+package tenant
 
-type TenantStatus string
+type Status string
 
 const (
 	TENANT_CREATED     = "created"
@@ -10,7 +10,7 @@ const (
 	TENANT_DESTROYED   = "destroyed"
 )
 
-var tenant_status = []TenantStatus{
+var tenant_status = []Status{
 	TENANT_CREATED,
 	TENANT_ONBOARDED,
 	TENANT_ACTIVATED,
@@ -18,7 +18,7 @@ var tenant_status = []TenantStatus{
 	TENANT_DESTROYED,
 }
 
-func NewTenantStatus(status TenantStatus) TenantStatus {
+func NewTenantStatus(status Status) Status {
 	for _, v := range tenant_status {
 		if v == status {
 			return v

@@ -13,5 +13,5 @@ func RegisterApis(app *provider.Application) {
 
 	r.Use(auth.CORSMiddleware())
 
-	r.GET("/", tenant_controller.Default)
+	r.GET("/create_tenant", tenant_controller.CreateTenant)
 }

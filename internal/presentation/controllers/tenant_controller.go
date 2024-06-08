@@ -1,18 +1,31 @@
 package controllers
 
 import (
+	"github.com/Marcellinom/tenant-management-saas/internal/app/commands"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type TenantController struct {
-	db *gorm.DB
+	create_tenant_cm commands.CreateTenantCommand
 }
 
-func NewTenantController(db *gorm.DB) *TenantController {
-	return &TenantController{db: db}
+func NewTenantController(
+	create_tenant_cm commands.CreateTenantCommand,
+) *TenantController {
+	return &TenantController{
+		create_tenant_cm: create_tenant_cm,
+	}
 }
 
-func (c TenantController) Default(ctx *gin.Context) {
-	SuccessWithData(ctx, "Halo")
+func (c TenantController) CreateTenant(ctx *gin.Context) {
+	var req commands.CreateTenantRequest
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.Error(err)
+	}
+	res, err := c.create_tenant_cm.Execute(req)
+	if err != nil {
+		ctx.Error(err)
+	}
+	SuccessWithData(ctx, res)
 }
