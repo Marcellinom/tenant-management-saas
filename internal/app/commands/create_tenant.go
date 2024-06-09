@@ -26,10 +26,12 @@ func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*tenant.Tenant, e
 	if err != nil {
 		return nil, errors.BadRequest(1001, "invalid organization id")
 	}
+
 	new_tenant := tenant.Create(product_id, org_id, req.Name)
 	err = c.tenant_repo.Persist(new_tenant)
 	if err != nil {
 		return nil, err
 	}
+
 	return new_tenant, nil
 }

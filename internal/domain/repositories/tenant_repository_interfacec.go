@@ -6,6 +6,6 @@ import (
 )
 
 type TenantRepositoryInterface interface {
-	Find(tenant_id uuid.UUID) (tenant.Tenant, error)
+	Find(tenant_id uuid.UUID) (*tenant.Tenant, error)
 	Persist(tenant *tenant.Tenant) error
 }

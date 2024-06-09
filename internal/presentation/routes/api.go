@@ -13,5 +13,7 @@ func RegisterApis(app *provider.Application) {
 
 	r.Use(auth.CORSMiddleware())
 
-	r.GET("/create_tenant", tenant_controller.CreateTenant)
+	r.POST("/create_tenant", tenant_controller.CreateTenant)
+
+	r.POST("/change_tier", tenant_controller.ChangeTenantTier)
 }

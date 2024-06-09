@@ -3,11 +3,12 @@ package tenant
 type Status string
 
 const (
-	TENANT_CREATED     = "created"
-	TENANT_ONBOARDED   = "onboarded"
-	TENANT_ACTIVATED   = "activated"
-	TENANT_DEACTIVATED = "deactivated"
-	TENANT_DESTROYED   = "destroyed"
+	TENANT_CREATED      = "created"
+	TENANT_ONBOARDED    = "onboarded"
+	TENANT_ACTIVATED    = "activated"
+	TENANT_DEACTIVATED  = "deactivated"
+	TENANT_DESTROYED    = "destroyed"
+	TENANT_TIER_CHANGED = "tier_changed"
 )
 
 var tenant_status = []Status{
@@ -16,6 +17,7 @@ var tenant_status = []Status{
 	TENANT_ACTIVATED,
 	TENANT_DEACTIVATED,
 	TENANT_DESTROYED,
+	TENANT_TIER_CHANGED,
 }
 
 func NewTenantStatus(status Status) Status {
