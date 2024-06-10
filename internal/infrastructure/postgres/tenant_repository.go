@@ -4,6 +4,7 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/tenant"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/google/uuid"
+	"time"
 )
 
 type TenantRepository struct {
@@ -36,10 +37,34 @@ func (t TenantRepository) Find(tenant_id uuid.UUID) (*tenant.Tenant, error) {
 		TenantId:       id,
 		ProductId:      productId,
 		OrganizationId: organizationId,
-		TenantStatus:   tenant.Status(tenant_data.Status),
+		TenantStatus:   tenant.NewTenantStatus(tenant.Status(tenant_data.Status)),
+		Name:           tenant_data.Name,
 	}, nil
 }
 
+func (t TenantRepository) Insert(tenant *tenant.Tenant) error {
+	return t.db.Table("tenants").Create(map[string]any{
+		"id":              tenant.TenantId.String(),
+		"product_id":      tenant.ProductId.String(),
+		"organization_id": tenant.OrganizationId.String(),
+		"name":            tenant.Name,
+		"status":          tenant.TenantStatus,
+		"created_at":      time.Now(),
+		"updated_at":      time.Now()}).Error
+}
+
 func (t TenantRepository) Persist(tenant *tenant.Tenant) error {
+	err := t.db.Table("tenants").
+		Where("id", tenant.TenantId.String()).
+		Updates(map[string]any{
+			"product_id": tenant.ProductId.String(),
+			"name":       tenant.Name,
+			"status":     tenant.TenantStatus,
+			"updated_at": time.Now(),
+		}).Error
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

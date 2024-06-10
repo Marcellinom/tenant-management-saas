@@ -8,5 +8,5 @@ import (
 
 func RegisterBindings(app *provider.Application) {
 	provider.Bind(app, "tenant_repository", postgres.NewTenantRepository(app.DefaultDatabase()))
-	provider.Bind(app, "event_service", event.NewRunner(app))
+	provider.Bind(app, "event_service", event.NewDefaultRunner(app))
 }

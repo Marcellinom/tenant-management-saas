@@ -32,7 +32,7 @@ func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*tenant.Tenant, e
 	}
 
 	new_tenant := tenant.Create(product_id, org_id, req.Name)
-	err = c.tenant_repo.Persist(new_tenant)
+	err = c.tenant_repo.Insert(new_tenant)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,6 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 	"github.com/google/uuid"
-	"time"
 )
 
 type ChangeTenantTierCommand struct {
@@ -43,12 +42,13 @@ func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTi
 	if err != nil {
 		return errors.Invariant(2004, "kesalahan dalam mengubah status tenant", err.Error())
 	}
-	err = c.tenant_repo.Persist(tenant)
-	if err != nil {
-		return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
-	}
 
-	ctx = context.WithValue(ctx, "deadline", time.Now().Add(5*time.Minute))
+	//err = c.tenant_repo.Persist(tenant)
+	//if err != nil {
+	//	return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
+	//}
+
+	//ctx = context.WithValue(ctx, "timeout", 5*time.Second)
 	c.event_service.Dispatch(ctx, "tenant_tier_changed", events.NewTenantTierChanged(tenant.TenantId.String(), product_id.String()))
 	return nil
 }

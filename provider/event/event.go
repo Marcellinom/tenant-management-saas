@@ -2,7 +2,6 @@ package event
 
 import (
 	"context"
-	"github.com/Marcellinom/tenant-management-saas/provider"
 	"time"
 )
 
@@ -17,9 +16,12 @@ type Listener interface {
 	MaxRetries() int
 }
 
-type NewListener = func(application *provider.Application) (Listener, error)
+type Handler struct {
+	Timeout  time.Duration
+	Listener Listener
+}
 
 type Service interface {
 	Dispatch(ctx context.Context, name string, payload Event)
-	RegisterListeners(event_name string, listenersConstructor []func(application *provider.Application) (Listener, error))
+	RegisterListeners(event_name string, listenersConstructor []Handler)
 }
