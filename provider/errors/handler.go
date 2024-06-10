@@ -38,6 +38,7 @@ func (e DefaultErrorHandler) Handle(debugMode bool) func(ctx *provider.Context) 
 
 		var badRequestError BadRequestError
 		var unauthorizedError UnauthorizedError
+		var invariantError InvariantError
 
 		switch {
 		case errors.As(err, &badRequestError):
@@ -61,6 +62,16 @@ func (e DefaultErrorHandler) Handle(debugMode bool) func(ctx *provider.Context) 
 					"code":    unauthorizedError.Code(),
 					"message": unauthorizedError.Message(),
 					"data":    data,
+				},
+			)
+		case errors.As(err, &invariantError):
+			log.Printf("Request ID: %s; Status: 500; Error: %s\n", requestId, err.Error())
+			ctx.JSON(
+				http.StatusInternalServerError,
+				H{
+					"code":    invariantError.Code(),
+					"message": invariantError.Message(),
+					"data":    invariantError.Data,
 				},
 			)
 		default:

@@ -11,14 +11,15 @@ type Event interface {
 	JSON() ([]byte, error)
 }
 
-type EventListener interface {
+type Listener interface {
 	Name() string
 	Handle(ctx context.Context, event Event) error
+	MaxRetries() int
 }
 
-type EventListenerConstructor = func(application provider.Application) (EventListener, error)
+type NewListener = func(application *provider.Application) (Listener, error)
 
-type EventService interface {
+type Service interface {
 	Dispatch(ctx context.Context, name string, payload Event)
-	Register(name string, listenersConstructor []EventListenerConstructor)
+	RegisterListeners(event_name string, listenersConstructor []func(application *provider.Application) (Listener, error))
 }

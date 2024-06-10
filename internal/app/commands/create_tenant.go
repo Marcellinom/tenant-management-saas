@@ -11,6 +11,10 @@ type CreateTenantCommand struct {
 	tenant_repo repositories.TenantRepositoryInterface
 }
 
+func NewCreateTenantCommand(tenant_repo repositories.TenantRepositoryInterface) *CreateTenantCommand {
+	return &CreateTenantCommand{tenant_repo: tenant_repo}
+}
+
 type CreateTenantRequest struct {
 	Organization_id string `json:"organization_id"`
 	Product_id      string `json:"product_id"`

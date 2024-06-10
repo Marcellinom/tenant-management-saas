@@ -6,13 +6,13 @@ import (
 )
 
 type TenantController struct {
-	create_tenant_cm      commands.CreateTenantCommand
-	change_tenant_tier_cm commands.ChangeTenantTierCommand
+	create_tenant_cm      *commands.CreateTenantCommand
+	change_tenant_tier_cm *commands.ChangeTenantTierCommand
 }
 
 func NewTenantController(
-	create_tenant_cm commands.CreateTenantCommand,
-	change_tenant_tier_cm commands.ChangeTenantTierCommand,
+	create_tenant_cm *commands.CreateTenantCommand,
+	change_tenant_tier_cm *commands.ChangeTenantTierCommand,
 ) *TenantController {
 	return &TenantController{
 		create_tenant_cm:      create_tenant_cm,
@@ -44,7 +44,7 @@ func (c TenantController) ChangeTenantTier(ctx *gin.Context) {
 		return
 	}
 
-	err = c.change_tenant_tier_cm.Execute(req)
+	err = c.change_tenant_tier_cm.Execute(ctx, req)
 	if err != nil {
 		ctx.Error(err)
 		return

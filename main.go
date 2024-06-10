@@ -17,6 +17,8 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Panic("Error loading .env file", err)
 	}
+	//gcp.Publish(context.TODO())
+	//go gcp.Subscribe(context.TODO())
 	startApp()
 	//testTerraform()
 }
@@ -71,7 +73,7 @@ func startApp() {
 	iam.RegisterCallback(engine)
 
 	if engine_cfg.Port == "" {
-		engine_cfg.Port = "80"
+		engine_cfg.Port = "8080"
 	}
 	engine.Run(":" + engine_cfg.Port)
 }

@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"github.com/samber/do"
+	"os"
 )
 
 type Application struct {
@@ -15,7 +16,12 @@ func (a Application) Engine() *WebEngine {
 	return a.engine
 }
 
-func (a Application) Database() *Connection {
+func (a Application) DefaultDatabase() *Database {
+	databases := *a.database
+	return databases[os.Getenv("DB_CONNECTION")]
+}
+
+func (a Application) Databases() *Connection {
 	return a.database
 }
 

@@ -1,6 +1,7 @@
 package tenant
 
 import (
+	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 	"github.com/google/uuid"
@@ -27,7 +28,11 @@ func Create(product_id uuid.UUID, organization_id uuid.UUID, name string) *Tenan
 	}
 }
 
-func (t *Tenant) ChangeTier(new_product_id uuid.UUID) {
+func (t *Tenant) ChangeTier(new_product_id uuid.UUID) error {
+	if t.TenantStatus != TENANT_ACTIVATED {
+		return fmt.Errorf("status tenant tidak aktif")
+	}
 	t.ProductId = new_product_id
-	t.events = append(t.events, events.NewTenantChangeTier(t.TenantId.String(), new_product_id.String()))
+	t.events = append(t.events, events.NewTenantTierChanged(t.TenantId.String(), new_product_id.String()))
+	return nil
 }
