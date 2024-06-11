@@ -1,10 +1,10 @@
 package queries
 
 import (
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/tenant"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/google/uuid"
 )
 
 type TenantQueryInterface interface {
-	GetTenantsByOrganization(organization_id uuid.UUID) (tenant.Tenant, error)
+	GetTenantsByOrganization(organization_id uuid.UUID) (Tenant.Tenant, error)
 }

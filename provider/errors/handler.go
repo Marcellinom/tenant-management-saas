@@ -39,8 +39,19 @@ func (e DefaultErrorHandler) Handle(debugMode bool) func(ctx *provider.Context) 
 		var badRequestError BadRequestError
 		var unauthorizedError UnauthorizedError
 		var invariantError InvariantError
+		var expectationFailed ExpectationFailedError
 
 		switch {
+		case errors.As(err, &expectationFailed):
+			log.Printf("Request ID: %s; Status: %d; Error: %s\n", requestId, http.StatusExpectationFailed, err.Error())
+			ctx.JSON(
+				http.StatusExpectationFailed,
+				H{
+					"code":    expectationFailed.Code(),
+					"message": expectationFailed.Message(),
+					"data":    data,
+				},
+			)
 		case errors.As(err, &badRequestError):
 			log.Printf("Request ID: %s; Status: 400; Error: %s\n", requestId, err.Error())
 			for key, val := range badRequestError.GetData() {

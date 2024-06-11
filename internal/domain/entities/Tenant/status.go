@@ -1,4 +1,4 @@
-package tenant
+package Tenant
 
 type Status string
 

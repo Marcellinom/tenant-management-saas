@@ -1,9 +1,10 @@
 package postgres
 
 import (
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/tenant"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -15,7 +16,7 @@ func NewTenantRepository(db *provider.Database) *TenantRepository {
 	return &TenantRepository{db: db}
 }
 
-func (t TenantRepository) Find(tenant_id uuid.UUID) (*tenant.Tenant, error) {
+func (t TenantRepository) Find(tenant_id uuid.UUID) (*Tenant.Tenant, error) {
 	var tenant_data struct {
 		Id                  string
 		ProductId           string
@@ -30,19 +31,23 @@ func (t TenantRepository) Find(tenant_id uuid.UUID) (*tenant.Tenant, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	id, _ := uuid.Parse(tenant_data.Id)
 	productId, _ := uuid.Parse(tenant_data.ProductId)
 	organizationId, _ := uuid.Parse(tenant_data.OrganizationId)
-	return &tenant.Tenant{
-		TenantId:       id,
-		ProductId:      productId,
-		OrganizationId: organizationId,
-		TenantStatus:   tenant.NewTenantStatus(tenant.Status(tenant_data.Status)),
-		Name:           tenant_data.Name,
+	infrastructureId, _ := uuid.Parse(tenant_data.InfrastructureId)
+
+	return &Tenant.Tenant{
+		TenantId:         id,
+		ProductId:        productId,
+		OrganizationId:   organizationId,
+		TenantStatus:     Tenant.NewTenantStatus(Tenant.Status(tenant_data.Status)),
+		Name:             tenant_data.Name,
+		InfrastructureId: infrastructureId,
 	}, nil
 }
 
-func (t TenantRepository) Insert(tenant *tenant.Tenant) error {
+func (t TenantRepository) Insert(tenant *Tenant.Tenant) error {
 	return t.db.Table("tenants").Create(map[string]any{
 		"id":              tenant.TenantId.String(),
 		"product_id":      tenant.ProductId.String(),
@@ -53,18 +58,16 @@ func (t TenantRepository) Insert(tenant *tenant.Tenant) error {
 		"updated_at":      time.Now()}).Error
 }
 
-func (t TenantRepository) Persist(tenant *tenant.Tenant) error {
-	err := t.db.Table("tenants").
-		Where("id", tenant.TenantId.String()).
-		Updates(map[string]any{
-			"product_id": tenant.ProductId.String(),
-			"name":       tenant.Name,
-			"status":     tenant.TenantStatus,
-			"updated_at": time.Now(),
-		}).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (t TenantRepository) Persist(tenant *Tenant.Tenant) error {
+	return t.db.Transaction(func(tx *gorm.DB) error {
+		return tx.Table("tenants").
+			Where("id", tenant.TenantId.String()).
+			Updates(map[string]any{
+				"product_id":        tenant.ProductId.String(),
+				"name":              tenant.Name,
+				"status":            tenant.TenantStatus,
+				"updated_at":        time.Now(),
+				"infrastructure_id": tenant.InfrastructureId.String(),
+			}).Error
+	})
 }

@@ -1,4 +1,4 @@
-package tenant
+package Tenant
 
 import (
 	"fmt"
@@ -8,11 +8,12 @@ import (
 )
 
 type Tenant struct {
-	TenantId       uuid.UUID `json:"tenant_id"`
-	ProductId      uuid.UUID `json:"product_id"`
-	OrganizationId uuid.UUID `json:"organization_id"`
-	TenantStatus   Status    `json:"tenant_status"`
-	Name           string    `json:"name"`
+	TenantId         uuid.UUID `json:"tenant_id"`
+	ProductId        uuid.UUID `json:"product_id"`
+	OrganizationId   uuid.UUID `json:"organization_id"`
+	InfrastructureId uuid.UUID `json:"infrastructure_id"`
+	TenantStatus     Status    `json:"tenant_status"`
+	Name             string    `json:"name"`
 
 	events []event.Event
 }

@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/tenant"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
 	"github.com/google/uuid"
@@ -21,7 +21,7 @@ type CreateTenantRequest struct {
 	Name            string `json:"name"`
 }
 
-func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*tenant.Tenant, error) {
+func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*Tenant.Tenant, error) {
 	product_id, err := uuid.Parse(req.Product_id)
 	if err != nil {
 		return nil, errors.BadRequest(1000, "invalid product id")
@@ -31,7 +31,7 @@ func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*tenant.Tenant, e
 		return nil, errors.BadRequest(1001, "invalid organization id")
 	}
 
-	new_tenant := tenant.Create(product_id, org_id, req.Name)
+	new_tenant := Tenant.Create(product_id, org_id, req.Name)
 	err = c.tenant_repo.Insert(new_tenant)
 	if err != nil {
 		return nil, err

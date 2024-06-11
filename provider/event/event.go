@@ -22,6 +22,6 @@ type Handler struct {
 }
 
 type Service interface {
-	Dispatch(ctx context.Context, name string, payload Event)
+	Dispatch(name string, payload Event)
 	RegisterListeners(event_name string, listenersConstructor []Handler)
 }

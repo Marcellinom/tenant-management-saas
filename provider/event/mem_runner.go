@@ -14,13 +14,20 @@ type DefaultRunner struct {
 	handler map[string][]Handler
 }
 
+func (r DefaultRunner) GetListenersForEvent(event string) []Handler {
+	v, exists := r.handler[event]
+	if !exists {
+		return []Handler{}
+	}
+	return v
+}
+
 func NewDefaultRunner(app *provider.Application) DefaultRunner {
 	return DefaultRunner{app: app, handler: make(map[string][]Handler)}
 }
 
-func (r DefaultRunner) run(ctx context.Context, event_name string, listener Listener, payload Event, timeout time.Duration) {
-	ctx = context.WithValue(ctx, "stop-signal", make(chan bool))
-	runner_context := ctx
+func (r DefaultRunner) run(event_name string, listener Listener, payload Event, timeout time.Duration) {
+	runner_context := context.Background()
 	if timeout > 0 {
 		var cancel func()
 		runner_context, cancel = context.WithTimeout(runner_context, timeout)
@@ -34,29 +41,29 @@ func (r DefaultRunner) run(ctx context.Context, event_name string, listener List
 
 	metadata, _ := payload.JSON()
 	select {
-	case <-runner_context.Done():
-		fmt.Println(runner_context.Err())
-		if errors.As(runner_context.Err(), &context.DeadlineExceeded) {
-			MarkAsFailed(r.app, event_name, listener.Name(), runner_context.Err().Error(), metadata, listener.MaxRetries())
-			ctx.Value("stop-signal").(chan bool) <- true
-		}
 	case err := <-err_chan:
 		fmt.Println(err)
 		if err != nil {
 			message := err.Error()
 			MarkAsFailed(r.app, event_name, listener.Name(), message, metadata, listener.MaxRetries())
-			ctx.Value("stop-signal").(chan bool) <- true
+			return
+		}
+	case <-runner_context.Done():
+		if errors.As(runner_context.Err(), &context.DeadlineExceeded) {
+			fmt.Println(runner_context.Err())
+			MarkAsFailed(r.app, event_name, listener.Name(), runner_context.Err().Error(), metadata, listener.MaxRetries())
+			return
 		}
 	}
 }
 
-func (r DefaultRunner) Dispatch(ctx context.Context, event_name string, payload Event) {
+func (r DefaultRunner) Dispatch(event_name string, payload Event) {
 	handlers, exists := r.handler[event_name]
 	if !exists {
 		log.Printf("tidak ada listener yang menghandle event: %s\n", event_name)
 	}
 	for _, handler := range handlers {
-		go r.run(ctx, event_name, handler.Listener, payload, handler.Timeout)
+		go r.run(event_name, handler.Listener, payload, handler.Timeout)
 	}
 }
 

@@ -10,24 +10,22 @@ import (
 )
 
 type TfBackend interface {
-	// ProcessStateFor butuh tenant id dalam konteks.
-	//  dir adalah tenant directory
-	ProcessStateFor(ctx context.Context) error
-	// ApplyStateFor
-	//  dir adalah tenant directory
-	ApplyStateFor(ctx context.Context) error
+	// Init butuh terraform executable dalam konteks
+	Init(ctx context.Context) error
+	// Apply butuh terraform executable dalam konteks
+	Apply(ctx context.Context) error
 }
 
-type DefaultBackend struct {
+type GcpBackend struct {
 	bucket, prefix string
 }
 
-func BuiltinBackend(bucket, prefix string) *DefaultBackend {
-	return &DefaultBackend{bucket: bucket, prefix: prefix}
+func Gcp(bucket, prefix string) GcpBackend {
+	return GcpBackend{bucket: bucket, prefix: prefix}
 }
 
-// ProcessStateFor butuh tenant id dalam konteks
-func (b *DefaultBackend) ProcessStateFor(ctx context.Context) error {
+// Init butuh tenant id dalam konteks
+func (b GcpBackend) Init(ctx context.Context) error {
 	tf, ok := ctx.Value("terraform").(*tfexec.Terraform)
 	if !ok {
 		return fmt.Errorf("executable terraform tidak disediakan")
@@ -55,7 +53,7 @@ func (b *DefaultBackend) ProcessStateFor(ctx context.Context) error {
 	switch {
 	case strings.Contains(string(f), "backend \"gcs\"") || auto_added_backend == "gcs": // TODO: naif
 		err := tf.Init(ctx,
-			tfexec.BackendConfig(fmt.Sprintf("prefix=%s/%s", b.prefix, ctx.Value("tenant_id").(string))),
+			tfexec.BackendConfig(fmt.Sprintf("prefix=%s", b.prefix)),
 			tfexec.BackendConfig(fmt.Sprintf("bucket=%s", b.bucket)),
 		)
 		if err != nil {
@@ -67,7 +65,7 @@ func (b *DefaultBackend) ProcessStateFor(ctx context.Context) error {
 	return nil
 }
 
-func (b *DefaultBackend) ApplyStateFor(ctx context.Context) error {
+func (b GcpBackend) Apply(ctx context.Context) error {
 	tf, ok := ctx.Value("terraform").(*tfexec.Terraform)
 	if !ok {
 		return fmt.Errorf("executable terraform tidak disediakan")

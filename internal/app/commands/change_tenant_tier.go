@@ -11,11 +11,12 @@ import (
 
 type ChangeTenantTierCommand struct {
 	tenant_repo   repositories.TenantRepositoryInterface
+	product_repo  repositories.ProductRepositoryInterface
 	event_service event.Service
 }
 
-func NewChangeTenantTierCommand(tenant_repo repositories.TenantRepositoryInterface, event_service event.Service) *ChangeTenantTierCommand {
-	return &ChangeTenantTierCommand{tenant_repo: tenant_repo, event_service: event_service}
+func NewChangeTenantTierCommand(tenant_repo repositories.TenantRepositoryInterface, product_repo repositories.ProductRepositoryInterface, event_service event.Service) *ChangeTenantTierCommand {
+	return &ChangeTenantTierCommand{tenant_repo: tenant_repo, product_repo: product_repo, event_service: event_service}
 }
 
 type ChangeTenantTierRequest struct {
@@ -38,17 +39,32 @@ func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTi
 		return errors.Invariant(2002, "kesalahan dalam mengambil data tenant", err.Error())
 	}
 
+	tenant_product, err := c.product_repo.Find(tenant.ProductId)
+	if err != nil {
+		return errors.Invariant(2006, "kesalahan dalam mengambil data produk tenant", err.Error())
+	}
+
+	target_product, err := c.product_repo.Find(product_id)
+	if err != nil {
+		return errors.Invariant(2005, "kesalahan dalam mengambil data produk target", err.Error())
+	}
+	if tenant_product.AppId.String() != target_product.AppId.String() {
+		return errors.ExpectationFailed(2007, "app id yang diminta tidak sesuai dengan app id yang dimiliki tenant")
+	}
+	if tenant.ProductId.String() != target_product.ProductId.String() {
+		return errors.ExpectationFailed(2008, "tier aplikasi yang ingin diubah tidak boleh sama dengan tier aplikasi tenant")
+	}
+
 	err = tenant.ChangeTier(product_id)
 	if err != nil {
 		return errors.Invariant(2004, "kesalahan dalam mengubah status tenant", err.Error())
 	}
 
-	//err = c.tenant_repo.Persist(tenant)
-	//if err != nil {
-	//	return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
-	//}
+	err = c.tenant_repo.Persist(tenant)
+	if err != nil {
+		return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
+	}
 
-	//ctx = context.WithValue(ctx, "timeout", 5*time.Second)
-	c.event_service.Dispatch(ctx, "tenant_tier_changed", events.NewTenantTierChanged(tenant.TenantId.String(), product_id.String()))
+	c.event_service.Dispatch("tenant_tier_changed", events.NewTenantTierChanged(tenant.TenantId.String(), product_id.String()))
 	return nil
 }

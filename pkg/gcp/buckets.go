@@ -26,7 +26,7 @@ func Bucket(bucket, prefix string) *BucketConfig {
 }
 
 // ProcessStateFor butuh tenant id dalam konteks
-func (b *BucketConfig) ProcessStateFor(ct context.Context) error {
+func (b *BucketConfig) Init(ct context.Context) error {
 	tf, ok := ct.Value("terraform").(*tfexec.Terraform)
 	if !ok {
 		return fmt.Errorf("executable terraform tidak disediakan")
@@ -72,7 +72,7 @@ func (b *BucketConfig) ProcessStateFor(ct context.Context) error {
 	return nil
 }
 
-func (b *BucketConfig) ApplyStateFor(ctx context.Context) error {
+func (b *BucketConfig) Apply(ctx context.Context) error {
 	tf, ok := ctx.Value("terraform").(*tfexec.Terraform)
 	if !ok {
 		return fmt.Errorf("executable terraform tidak disediakan")
