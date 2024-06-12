@@ -3,7 +3,6 @@ package listeners
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Infrastructure"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Product"
@@ -13,10 +12,8 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraformProduct"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraformTenant"
-	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"os"
 )
 
@@ -24,15 +21,18 @@ type TenantTierChangedListener struct {
 	product_repo  repositories.ProductRepositoryInterface
 	infra_service services.InfrastructureServiceInterface
 	tenant_repo   repositories.TenantRepositoryInterface
-	db            provider.Database
 }
 
-func NewTenantTierChangedListener() TenantTierChangedListener {
-	return TenantTierChangedListener{}
+func NewTenantTierChangedListener(product_repo repositories.ProductRepositoryInterface, infra_service services.InfrastructureServiceInterface, tenant_repo repositories.TenantRepositoryInterface) *TenantTierChangedListener {
+	return &TenantTierChangedListener{product_repo: product_repo, infra_service: infra_service, tenant_repo: tenant_repo}
 }
 
 func (r TenantTierChangedListener) Name() string {
 	return fmt.Sprintf("%T", r)
+}
+
+func (r TenantTierChangedListener) MaxRetries() int {
+	return 3
 }
 
 func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event) error {
@@ -85,12 +85,13 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	case terraform.POOL:
 		infra_to_use, err = r.infra_service.FindAvailablePool()
 		if err != nil {
-			if errors.As(err, &gorm.ErrRecordNotFound) {
-				infra_to_use = Infrastructure.CreatePool(target_product.ProductId)
-			} else {
-				return err
-			}
+			return err
 		}
+
+		if infra_to_use == nil && err == nil {
+			infra_to_use = Infrastructure.CreatePool(target_product.ProductId)
+		}
+
 		if infra_to_use.UserCount > infra_to_use.MaxUser {
 			infra_to_use = Infrastructure.CreatePool(target_product.ProductId)
 		}
@@ -111,6 +112,11 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("terjadi kesalahan dalam menginisialisasi terraform: %w", err)
 	}
 
+	output, err := tf.Output(ctx)
+	if err != nil {
+		return fmt.Errorf("kegagalan dalam fetch output tf state: %w", err)
+	}
+	fmt.Println("RESULT:::", output)
 	return nil
 }
 
@@ -147,8 +153,4 @@ func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTie
 		product_deployment_schema.TfEntryPointDir,
 		product_deployment_schema.ScriptEntrypoint,
 	), nil
-}
-
-func (r TenantTierChangedListener) MaxRetries() int {
-	return 3
 }

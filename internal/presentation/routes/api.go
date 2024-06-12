@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/app/commands"
-	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/postgres"
+	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/repositories/postgres"
 	"github.com/Marcellinom/tenant-management-saas/internal/presentation/controllers"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/auth"
@@ -11,11 +11,12 @@ import (
 
 func RegisterApis(app *provider.Application) {
 	tenant_repo := provider.Make[*postgres.TenantRepository](app, "tenant_repository")
+	product_repo := provider.Make[*postgres.ProductRepository](app, "product_repository")
 	event_service := provider.Make[event.DefaultRunner](app, "event_service")
 
 	tenant_controller := controllers.NewTenantController(
 		commands.NewCreateTenantCommand(tenant_repo),
-		commands.NewChangeTenantTierCommand(tenant_repo, event_service),
+		commands.NewChangeTenantTierCommand(tenant_repo, product_repo, event_service),
 	)
 
 	r := app.Engine().Group("/api")

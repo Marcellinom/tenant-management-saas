@@ -1,5 +1,10 @@
 package terraformProduct
 
+import (
+	"github.com/go-git/go-git"
+	"os"
+)
+
 type ProductBackend interface {
 	CloneTo(path string) error
 	DeleteOn(path string) error
@@ -14,8 +19,14 @@ func UsingGit(config *ProductConfig) ProductStoredOnGit {
 	return ProductStoredOnGit{product_config: config}
 }
 
-// TODO: implement this
 func (g ProductStoredOnGit) CloneTo(path string) error {
+	_, err := git.PlainClone(path, false, &git.CloneOptions{
+		URL:      g.product_config.product_url,
+		Progress: os.Stdout,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
