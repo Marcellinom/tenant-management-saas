@@ -25,7 +25,7 @@ func Bucket(bucket, prefix string) *BucketConfig {
 	return &BucketConfig{bucket: bucket, prefix: prefix}
 }
 
-// ProcessStateFor butuh tenant id dalam konteks
+// Init butuh tenant id dalam konteks
 func (b *BucketConfig) Init(ct context.Context) error {
 	tf, ok := ct.Value("terraform").(*tfexec.Terraform)
 	if !ok {

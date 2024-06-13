@@ -28,19 +28,14 @@ const HYBRID = "hybrid"
 func New(tf_working_dir, tf_executable string, tenant *terraform_tenant.TenantConfig, product_backend terraform_product.ProductBackend) (*TfExecutable, error) {
 	tenant_path := filepath.Join(tf_working_dir, "tenants", tenant.TenantId())
 
-	tf_exec, err := tfexec.NewTerraform(tenant_path, tf_executable)
-	if err != nil {
-		return nil, fmt.Errorf("gagal menjalankan terraform executable: %w", err)
-	}
-
 	tf := &TfExecutable{
 		tenant_path:     tenant_path,
-		executable:      tf_exec,
 		working_dir:     tf_working_dir,
 		product_backend: product_backend,
 		tf_tenant:       tenant,
 	}
-
+	var err error
+	// reset tenant dir
 	if err = tf.RemoveTenantDir(); err != nil {
 		return nil, err
 	}
@@ -53,10 +48,14 @@ func New(tf_working_dir, tf_executable string, tenant *terraform_tenant.TenantCo
 	if err != nil {
 		return nil, err
 	}
-	err = tf.copyProductConfigToTenant()
+
+	tf_exec, err := tfexec.NewTerraform(filepath.Join(tenant_path, product_backend.GetProductConfig().GetTfEntrypoint()), tf_executable)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("gagal menjalankan terraform executable: %w", err)
 	}
+
+	tf.executable = tf_exec
+
 	return tf, nil
 }
 

@@ -1,8 +1,11 @@
 package terraform_product
 
 import (
+	"fmt"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type ProductBackend interface {
@@ -20,7 +23,8 @@ func UsingGit(config *ProductConfig) ProductStoredOnGit {
 }
 
 func (g ProductStoredOnGit) CloneTo(path string) error {
-	_, err := git.PlainClone(path, false, &git.CloneOptions{
+	fmt.Println("REPO NAME: ", g.repoName(g.product_config.product_url))
+	_, err := git.PlainClone(filepath.Join(path, g.repoName(g.product_config.product_url)), false, &git.CloneOptions{
 		URL:      g.product_config.product_url,
 		Progress: os.Stdout,
 	})
@@ -37,4 +41,17 @@ func (g ProductStoredOnGit) DeleteOn(path string) error {
 
 func (g ProductStoredOnGit) GetProductConfig() *ProductConfig {
 	return g.product_config
+}
+
+func (g ProductStoredOnGit) repoName(path string) string {
+	without_git_prefix := strings.Replace(path, ".git", "", -1)
+	lastSlash := strings.LastIndexAny(without_git_prefix, string(filepath.Separator)+"/")
+
+	if lastSlash == -1 {
+		// If no slash is found, return the entire string
+		return without_git_prefix
+	}
+
+	// Return the substring from the last slash to the end of the string
+	return without_git_prefix[lastSlash+1:]
 }

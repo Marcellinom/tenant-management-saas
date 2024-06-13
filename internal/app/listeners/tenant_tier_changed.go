@@ -106,6 +106,7 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	if err != nil {
 		return fmt.Errorf("terjasi kesalahan dalam memroses executable terraform: %w", err)
 	}
+	fmt.Println("success initializing terraform workdir")
 
 	defer tf.RemoveTenantDir()
 
