@@ -3,8 +3,8 @@ package postgres
 import (
 	"errors"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Product"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -25,7 +25,7 @@ type product_schema struct {
 	DeploymentType   string
 }
 
-func (p ProductRepository) Find(product_id uuid.UUID) (*Product.Product, error) {
+func (p ProductRepository) Find(product_id vo.ProductId) (*Product.Product, error) {
 	var product_row product_schema
 	err := p.db.Table("products").
 		Where("id", product_id.String()).Take(&product_row).Error
@@ -40,13 +40,13 @@ func (p ProductRepository) Find(product_id uuid.UUID) (*Product.Product, error) 
 }
 
 func (p ProductRepository) construct(row product_schema) (*Product.Product, error) {
-	product_id, err := uuid.Parse(row.Id)
+	product_id, err := vo.NewProductId(row.Id)
 	if err != nil {
 		return nil, err
 	}
 	return &Product.Product{
 		ProductId:        product_id,
-		AppId:            Product.AppIdType(row.AppId),
+		AppId:            vo.AppId(row.AppId),
 		DeploymentType:   row.DeploymentType,
 		DeploymentSchema: row.DeploymentSchema,
 	}, nil

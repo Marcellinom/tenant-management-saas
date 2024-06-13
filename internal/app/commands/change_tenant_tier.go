@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
-	"github.com/google/uuid"
 )
 
 type ChangeTenantTierCommand struct {
@@ -26,11 +26,11 @@ type ChangeTenantTierRequest struct {
 }
 
 func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTierRequest) error {
-	tenant_id, err := uuid.Parse(req.TenantId)
+	tenant_id, err := vo.NewTenantId(req.TenantId)
 	if err != nil {
 		return errors.BadRequest(2000, "invalid tenant id format")
 	}
-	product_id, err := uuid.Parse(req.NewProductId)
+	product_id, err := vo.NewProductId(req.NewProductId)
 	if err != nil {
 		return errors.BadRequest(2001, "invalid product id format")
 	}
@@ -62,10 +62,10 @@ func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTi
 		return errors.ExpectationFailed(2004, fmt.Sprintf("kesalahan dalam mengubah status tenant: %s", err.Error()))
 	}
 
-	err = c.tenant_repo.Persist(tenant)
-	if err != nil {
-		return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
-	}
+	//err = c.tenant_repo.Persist(tenant)
+	//if err != nil {
+	//	return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
+	//}
 
 	c.event_service.Dispatch("tenant_tier_changed", events.NewTenantTierChanged(tenant.TenantId.String(), product_id.String()))
 	return nil

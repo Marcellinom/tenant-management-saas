@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 )
@@ -16,7 +16,7 @@ func NewTenantRepository(db *provider.Database) *TenantRepository {
 	return &TenantRepository{db: db}
 }
 
-func (t TenantRepository) Find(tenant_id uuid.UUID) (*Tenant.Tenant, error) {
+func (t TenantRepository) Find(tenant_id vo.TenantId) (*Tenant.Tenant, error) {
 	var tenant_data struct {
 		Id                  string
 		ProductId           string
@@ -32,10 +32,10 @@ func (t TenantRepository) Find(tenant_id uuid.UUID) (*Tenant.Tenant, error) {
 		return nil, err
 	}
 
-	id, _ := uuid.Parse(tenant_data.Id)
-	productId, _ := uuid.Parse(tenant_data.ProductId)
-	organizationId, _ := uuid.Parse(tenant_data.OrganizationId)
-	infrastructureId, _ := uuid.Parse(tenant_data.InfrastructureId)
+	id, _ := vo.NewTenantId(tenant_data.Id)
+	productId, _ := vo.NewProductId(tenant_data.ProductId)
+	organizationId, _ := vo.NewOrganizationId(tenant_data.OrganizationId)
+	infrastructureId, _ := vo.NewInfrastructureId(tenant_data.InfrastructureId)
 
 	return &Tenant.Tenant{
 		TenantId:         id,

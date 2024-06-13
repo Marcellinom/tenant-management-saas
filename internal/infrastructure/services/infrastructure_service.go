@@ -3,8 +3,8 @@ package services
 import (
 	"errors"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Infrastructure"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -28,8 +28,9 @@ type infra_schema struct {
 
 var infra_row infra_schema
 
-func (i InfrastructureService) FindAvailablePool() (*Infrastructure.Infrastructure, error) {
-	err := i.db.Raw("select * from infrastructures where deployment_model = 'pool' and user_count < user_limit").
+func (i InfrastructureService) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
+	err := i.db.Raw("select * from infrastructures where product_id = ? and "+
+		"deployment_model = 'pool' and user_count < user_limit", product_id.String()).
 		Take(&infra_row).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -43,7 +44,8 @@ func (i InfrastructureService) Persist(infra *Infrastructure.Infrastructure) err
 
 	return nil
 }
-func (i InfrastructureService) Find(infra_id uuid.UUID) (*Infrastructure.Infrastructure, error) {
+
+func (i InfrastructureService) Find(infra_id vo.InfrastructureId) (*Infrastructure.Infrastructure, error) {
 	err := i.db.Table("infrastructures").Where("id", infra_id.String()).
 		Take(&infra_row).Error
 	if err != nil {
@@ -56,11 +58,11 @@ func (i InfrastructureService) Find(infra_id uuid.UUID) (*Infrastructure.Infrast
 }
 
 func (i InfrastructureService) construct(infra_row infra_schema) (*Infrastructure.Infrastructure, error) {
-	infra_id, err := uuid.Parse(infra_row.Id)
+	infra_id, err := vo.NewInfrastructureId(infra_row.Id)
 	if err != nil {
 		return nil, err
 	}
-	product_id, err := uuid.Parse(infra_row.ProductId)
+	product_id, err := vo.NewProductId(infra_row.ProductId)
 	if err != nil {
 		return nil, err
 	}

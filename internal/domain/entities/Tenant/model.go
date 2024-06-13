@@ -3,24 +3,24 @@ package Tenant
 import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
-	"github.com/google/uuid"
 )
 
 type Tenant struct {
-	TenantId         uuid.UUID `json:"tenant_id"`
-	ProductId        uuid.UUID `json:"product_id"`
-	OrganizationId   uuid.UUID `json:"organization_id"`
-	InfrastructureId uuid.UUID `json:"infrastructure_id"`
-	TenantStatus     Status    `json:"tenant_status"`
-	Name             string    `json:"name"`
+	TenantId         vo.TenantId         `json:"tenant_id"`
+	ProductId        vo.ProductId        `json:"product_id"`
+	OrganizationId   vo.OrganizationId   `json:"organization_id"`
+	InfrastructureId vo.InfrastructureId `json:"infrastructure_id"`
+	TenantStatus     Status              `json:"tenant_status"`
+	Name             string              `json:"name"`
 
 	events []event.Event
 }
 
-func Create(product_id uuid.UUID, organization_id uuid.UUID, name string) *Tenant {
+func Create(product_id vo.ProductId, organization_id vo.OrganizationId, name string) *Tenant {
 	return &Tenant{
-		TenantId:       uuid.New(),
+		TenantId:       vo.GenerateUuid[vo.TenantId](),
 		TenantStatus:   TENANT_CREATED,
 		ProductId:      product_id,
 		OrganizationId: organization_id,
@@ -29,7 +29,7 @@ func Create(product_id uuid.UUID, organization_id uuid.UUID, name string) *Tenan
 	}
 }
 
-func (t *Tenant) ChangeTier(new_product_id uuid.UUID) error {
+func (t *Tenant) ChangeTier(new_product_id vo.ProductId) error {
 	if t.TenantStatus != TENANT_ACTIVATED {
 		return fmt.Errorf("status tenant tidak aktif")
 	}

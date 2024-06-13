@@ -2,21 +2,21 @@ package Infrastructure
 
 import (
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 )
 
 type Infrastructure struct {
-	InfrastructureId uuid.UUID `json:"infrastructure_id"`
-	ProductId        uuid.UUID `json:"product_id"`
-	UserCount        int       `json:"user_count"`
-	MaxUser          int       `json:"max_user"`
-	Metadata         []byte    `json:"metadata"`
-	DeploymentModel  string    `json:"deployment_model"`
-	Prefix           string    `json:"prefix"` // prefix buat nyimpen tfstate nya di remote
+	InfrastructureId vo.InfrastructureId `json:"infrastructure_id"`
+	ProductId        vo.ProductId        `json:"product_id"`
+	UserCount        int                 `json:"user_count"`
+	MaxUser          int                 `json:"max_user"`
+	Metadata         []byte              `json:"metadata"`
+	DeploymentModel  string              `json:"deployment_model"`
+	Prefix           string              `json:"prefix"` // prefix buat nyimpen tfstate nya di remote
 }
 
-func CreatePool(product_id uuid.UUID) *Infrastructure {
-	infra_id := uuid.New()
+func CreatePool(product_id vo.ProductId) *Infrastructure {
+	infra_id := vo.GenerateUuid[vo.InfrastructureId]()
 	return &Infrastructure{
 		InfrastructureId: infra_id,
 		ProductId:        product_id,
@@ -27,8 +27,8 @@ func CreatePool(product_id uuid.UUID) *Infrastructure {
 	}
 }
 
-func CreateSilo(product_id uuid.UUID) *Infrastructure {
-	infra_id := uuid.New()
+func CreateSilo(product_id vo.ProductId) *Infrastructure {
+	infra_id := vo.GenerateUuid[vo.InfrastructureId]()
 	return &Infrastructure{
 		InfrastructureId: infra_id,
 		ProductId:        product_id,

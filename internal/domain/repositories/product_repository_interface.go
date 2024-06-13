@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Product"
-	"github.com/google/uuid"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 )
 
 type ProductRepositoryInterface interface {
-	Find(product_id uuid.UUID) (*Product.Product, error)
+	Find(product_id vo.ProductId) (*Product.Product, error)
 }

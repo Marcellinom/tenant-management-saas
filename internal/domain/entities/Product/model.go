@@ -1,12 +1,12 @@
 package Product
 
-import "github.com/google/uuid"
-
-type AppIdType int
+import (
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
+)
 
 type Product struct {
-	ProductId        uuid.UUID `json:"product_id"`
-	AppId            AppIdType `json:"app_id"`
-	DeploymentSchema []byte    `json:"deployment_schema"`
-	DeploymentType   string    `json:"deployment_type"`
+	ProductId        vo.ProductId `json:"product_id"`
+	AppId            vo.AppId     `json:"app_id"`
+	DeploymentSchema []byte       `json:"deployment_schema"`
+	DeploymentType   string       `json:"deployment_type"`
 }

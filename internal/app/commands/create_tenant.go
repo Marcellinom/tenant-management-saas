@@ -3,8 +3,8 @@ package commands
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
-	"github.com/google/uuid"
 )
 
 type CreateTenantCommand struct {
@@ -22,11 +22,11 @@ type CreateTenantRequest struct {
 }
 
 func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*Tenant.Tenant, error) {
-	product_id, err := uuid.Parse(req.Product_id)
+	product_id, err := vo.NewProductId(req.Product_id)
 	if err != nil {
 		return nil, errors.BadRequest(1000, "invalid product id")
 	}
-	org_id, err := uuid.Parse(req.Organization_id)
+	org_id, err := vo.NewOrganizationId(req.Organization_id)
 	if err != nil {
 		return nil, errors.BadRequest(1001, "invalid organization id")
 	}

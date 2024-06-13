@@ -9,11 +9,11 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_product"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_tenant"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
-	"github.com/google/uuid"
 	"os"
 )
 
@@ -56,7 +56,7 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	}
 
 	// data tenant and it's infrastructure
-	tenant_id, err := uuid.Parse(payload.TenantId)
+	tenant_id, err := vo.NewTenantId(payload.TenantId)
 	if err != nil {
 		return fmt.Errorf("gagal memparsing uuid tenant %w", err)
 	}
@@ -83,7 +83,7 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 
 	switch target_product.DeploymentType {
 	case terraform.POOL:
-		infra_to_use, err = r.infra_service.FindAvailablePool()
+		infra_to_use, err = r.infra_service.FindAvailablePoolForProduct(target_product.ProductId)
 		if err != nil {
 			return err
 		}
@@ -98,9 +98,6 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	case terraform.SILO:
 		infra_to_use = Infrastructure.CreateSilo(target_product.ProductId)
 	}
-
-	fmt.Println(infra_to_use, target_product, tenant, product_conf)
-	return nil
 
 	tf, err := terraform.New(
 		os.Getenv("TF_WORKDIR"), os.Getenv("TF_EXECUTABLE"),
@@ -134,7 +131,7 @@ func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTie
 		return nil, nil, er
 	}
 
-	product_id, err := uuid.Parse(payload.NewProductId)
+	product_id, err := vo.NewProductId(payload.NewProductId)
 	if err != nil {
 		return e(err)
 	}
