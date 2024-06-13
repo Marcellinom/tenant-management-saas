@@ -2,7 +2,6 @@ package Infrastructure
 
 import (
 	"fmt"
-	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
 	"github.com/google/uuid"
 )
 
@@ -23,7 +22,7 @@ func CreatePool(product_id uuid.UUID) *Infrastructure {
 		ProductId:        product_id,
 		UserCount:        1,
 		MaxUser:          100,
-		DeploymentModel:  terraform.POOL,
+		DeploymentModel:  "pool",
 		Prefix:           fmt.Sprintf("infrastructures/%s", infra_id.String()),
 	}
 }
@@ -35,7 +34,7 @@ func CreateSilo(product_id uuid.UUID) *Infrastructure {
 		ProductId:        product_id,
 		UserCount:        1,
 		MaxUser:          1,
-		DeploymentModel:  terraform.SILO,
+		DeploymentModel:  "silo",
 		Prefix:           fmt.Sprintf("infrastructures/%s", infra_id.String()),
 	}
 }

@@ -11,7 +11,7 @@ import (
 
 func RegisterEvents(app *provider.Application) {
 	event_service := provider.Make[event.DefaultRunner](app, "event_service")
-	infra_service := provider.Make[services.InfrastructureService](app, "infrastructure_service")
+	infra_service := provider.Make[*services.InfrastructureService](app, "infrastructure_service")
 	tenant_repo := provider.Make[*postgres.TenantRepository](app, "tenant_repository")
 	product_repo := provider.Make[*postgres.ProductRepository](app, "product_repository")
 

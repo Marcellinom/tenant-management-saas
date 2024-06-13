@@ -1,4 +1,4 @@
-package terraformTenant
+package terraform_tenant
 
 import (
 	"github.com/hashicorp/terraform-exec/tfexec"

@@ -1,4 +1,4 @@
-package terraformProduct
+package terraform_product
 
 type ProductConfig struct {
 	product_url           string

@@ -29,7 +29,7 @@ type infra_schema struct {
 var infra_row infra_schema
 
 func (i InfrastructureService) FindAvailablePool() (*Infrastructure.Infrastructure, error) {
-	err := i.db.Raw("select * from infrastructures where deployement_model = 'pool' and user_count < user_limit").
+	err := i.db.Raw("select * from infrastructures where deployment_model = 'pool' and user_count < user_limit").
 		Take(&infra_row).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

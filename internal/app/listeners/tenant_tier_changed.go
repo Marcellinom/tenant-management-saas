@@ -10,8 +10,8 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
-	"github.com/Marcellinom/tenant-management-saas/pkg/terraformProduct"
-	"github.com/Marcellinom/tenant-management-saas/pkg/terraformTenant"
+	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_product"
+	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_tenant"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 	"github.com/google/uuid"
 	"os"
@@ -99,13 +99,18 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 		infra_to_use = Infrastructure.CreateSilo(target_product.ProductId)
 	}
 
+	fmt.Println(infra_to_use, target_product, tenant, product_conf)
+	return nil
+
 	tf, err := terraform.New(
 		os.Getenv("TF_WORKDIR"), os.Getenv("TF_EXECUTABLE"),
-		terraformTenant.New(tenant.TenantId.String(), target_product.ProductId.String(), target_product.DeploymentType),
-		terraformProduct.UsingGit(product_conf))
+		terraform_tenant.New(tenant.TenantId.String(), target_product.ProductId.String(), target_product.DeploymentType),
+		terraform_product.UsingGit(product_conf))
 	if err != nil {
 		return fmt.Errorf("terjasi kesalahan dalam memroses executable terraform: %w", err)
 	}
+
+	defer tf.RemoveTenantDir()
 
 	err = tf.UseBackend(terraform.Gcp(os.Getenv("GOOGLE_BUCKET"), infra_to_use.Prefix)).Init(ctx)
 	if err != nil {
@@ -124,8 +129,8 @@ func (r TenantTierChangedListener) MarkToBeDestroyed(infra *Infrastructure.Infra
 
 }
 
-func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTierChanged) (*Product.Product, *terraformProduct.ProductConfig, error) {
-	var e = func(er error) (*Product.Product, *terraformProduct.ProductConfig, error) {
+func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTierChanged) (*Product.Product, *terraform_product.ProductConfig, error) {
+	var e = func(er error) (*Product.Product, *terraform_product.ProductConfig, error) {
 		return nil, nil, er
 	}
 
@@ -148,7 +153,7 @@ func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTie
 	if err != nil {
 		return e(err)
 	}
-	return target_product, terraformProduct.NewProductConfig(
+	return target_product, terraform_product.NewProductConfig(
 		product_deployment_schema.TfRepoUrl,
 		product_deployment_schema.TfEntryPointDir,
 		product_deployment_schema.ScriptEntrypoint,

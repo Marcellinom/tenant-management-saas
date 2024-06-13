@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
@@ -48,16 +49,17 @@ func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTi
 	if err != nil {
 		return errors.Invariant(2005, "kesalahan dalam mengambil data produk target", err.Error())
 	}
-	if tenant_product.AppId.String() != target_product.AppId.String() {
+
+	if tenant_product.AppId != target_product.AppId {
 		return errors.ExpectationFailed(2007, "app id yang diminta tidak sesuai dengan app id yang dimiliki tenant")
 	}
-	if tenant.ProductId.String() != target_product.ProductId.String() {
+	if tenant.ProductId.String() == target_product.ProductId.String() {
 		return errors.ExpectationFailed(2008, "tier aplikasi yang ingin diubah tidak boleh sama dengan tier aplikasi tenant")
 	}
 
 	err = tenant.ChangeTier(product_id)
 	if err != nil {
-		return errors.Invariant(2004, "kesalahan dalam mengubah status tenant", err.Error())
+		return errors.ExpectationFailed(2004, fmt.Sprintf("kesalahan dalam mengubah status tenant: %s", err.Error()))
 	}
 
 	err = c.tenant_repo.Persist(tenant)

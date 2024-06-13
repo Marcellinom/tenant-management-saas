@@ -18,16 +18,15 @@ func NewProductRepository(db *provider.Database) *ProductRepository {
 
 type product_schema struct {
 	Id               string
-	AppId            string
+	AppId            int
 	DeploymentSchema []byte
 	TierName         string
 	Price            float64
 	DeploymentType   string
 }
 
-var product_row product_schema
-
 func (p ProductRepository) Find(product_id uuid.UUID) (*Product.Product, error) {
+	var product_row product_schema
 	err := p.db.Table("products").
 		Where("id", product_id.String()).Take(&product_row).Error
 
@@ -45,13 +44,9 @@ func (p ProductRepository) construct(row product_schema) (*Product.Product, erro
 	if err != nil {
 		return nil, err
 	}
-	app_id, err := uuid.Parse(row.AppId)
-	if err != nil {
-		return nil, err
-	}
 	return &Product.Product{
 		ProductId:        product_id,
-		AppId:            app_id,
+		AppId:            Product.AppIdType(row.AppId),
 		DeploymentType:   row.DeploymentType,
 		DeploymentSchema: row.DeploymentSchema,
 	}, nil

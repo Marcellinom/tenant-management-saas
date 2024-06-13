@@ -1,7 +1,7 @@
-package terraformProduct
+package terraform_product
 
 import (
-	"github.com/go-git/go-git"
+	"gopkg.in/src-d/go-git.v4"
 	"os"
 )
 

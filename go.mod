@@ -22,7 +22,6 @@ require (
 	cloud.google.com/go/iam v1.1.8 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/go-git/go-git v4.7.0+incompatible // indirect
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
