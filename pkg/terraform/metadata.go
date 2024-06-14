@@ -5,12 +5,12 @@ import (
 	"github.com/hashicorp/terraform-exec/tfexec"
 )
 
-func (t *TfExecutable) Output(ctx context.Context) (map[string]tfexec.OutputMeta, error) {
+func (t *TfExecutable) GetMetaData(ctx context.Context) ([]byte, error) {
 	var output map[string]tfexec.OutputMeta
 	var err error
 	output, err = t.executable.Output(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return output, nil
+	return output["metadata"].Value, nil
 }

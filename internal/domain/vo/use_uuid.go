@@ -5,20 +5,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type UseUuid struct {
+type useUuid struct {
 	value string
 }
 
-func (t UseUuid) String() string {
+func (t useUuid) String() string {
 	return t.value
 }
 
-func GenerateUuid[T ~struct{ UseUuid }]() T {
-	return T{UseUuid{uuid.NewString()}}
+func GenerateUuid[T ~struct{ useUuid }]() T {
+	return T{useUuid{uuid.NewString()}}
 }
 
 // ConstructUuid Hack constructor biar "method" disini bisa di "extend" sama value object Id lainnya
-func newUuid[T ~struct{ UseUuid }](str string, customError ...errors.InvariantError) (T, error) {
+func newUuid[T ~struct{ useUuid }](str string, customError ...errors.InvariantError) (T, error) {
 	_, err := uuid.Parse(str)
 	if err != nil {
 		if len(customError) > 0 {
@@ -27,5 +27,5 @@ func newUuid[T ~struct{ UseUuid }](str string, customError ...errors.InvariantEr
 			return T{}, err
 		}
 	}
-	return T{UseUuid{str}}, nil
+	return T{useUuid{str}}, nil
 }

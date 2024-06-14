@@ -18,7 +18,10 @@ type BucketConfig struct {
 	bucket, prefix string
 }
 
-func Bucket(bucket, prefix string) *BucketConfig {
+// BucketBackend Hanya sebagai contoh jika mau implementasi interface custom backend,
+//
+//	terraform sudah support backend gcs dari sono nya
+func BucketBackend(bucket, prefix string) *BucketConfig {
 	if prefix == "" {
 		log.Panic("sebaiknya prefix jangan kosong jendral")
 	}

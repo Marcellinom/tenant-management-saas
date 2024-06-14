@@ -3,7 +3,7 @@ package vo
 import "github.com/Marcellinom/tenant-management-saas/provider/errors"
 
 type ProductId struct {
-	UseUuid
+	useUuid
 }
 
 func NewProductId(uuid string) (ProductId, error) {

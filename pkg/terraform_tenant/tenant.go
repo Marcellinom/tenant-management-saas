@@ -7,7 +7,7 @@ import (
 type TenantConfig struct {
 	tenant_id, deployment_type, product_id string
 
-	TenantEnv []tfexec.VarOption
+	TenantEnv []*tfexec.VarOption
 }
 
 func (t TenantConfig) TenantId() string {
@@ -22,11 +22,11 @@ func (t TenantConfig) ProductId() string {
 	return t.product_id
 }
 
-func New(tenant_id, product_id, deployment_type string, tenant_env ...tfexec.VarOption) *TenantConfig {
+func New(tenant_id, product_id, deployment_type string) *TenantConfig {
 	return &TenantConfig{
 		tenant_id:       tenant_id,
 		deployment_type: deployment_type,
 		product_id:      product_id,
-		TenantEnv:       tenant_env,
+		TenantEnv:       make([]*tfexec.VarOption, 0),
 	}
 }

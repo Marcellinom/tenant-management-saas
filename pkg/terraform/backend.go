@@ -10,9 +10,9 @@ import (
 )
 
 type TfBackend interface {
-	// Init butuh terraform executable dalam konteks
+	// Init butuh terraform executable dalam konteks dengan key "terraform"
 	Init(ctx context.Context) error
-	// Apply butuh terraform executable dalam konteks
+	// Apply butuh terraform executable dalam konteks dengan key "terraform"
 	Apply(ctx context.Context) error
 }
 
@@ -35,8 +35,7 @@ func (b GcpBackend) Init(ctx context.Context) error {
 		return fmt.Errorf("terjadi kesalahan dalam membaca main.tf: %w", err)
 	}
 
-	var auto_added_backend string
-	// berarti belum ada konfig backendnya, tambahin makanya
+	// berarti belum ada konfig backendnya, tambahin
 	if !strings.Contains(string(f), "terraform") {
 		o, err := os.OpenFile(filepath.Join(tf.WorkingDir(), "main.tf"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		if err != nil {
@@ -47,11 +46,10 @@ func (b GcpBackend) Init(ctx context.Context) error {
 			return fmt.Errorf("terjadi kesalahan dalam menambahkan config backend: %w", err)
 		}
 		o.Close()
-		auto_added_backend = "gcs"
 	}
 
 	switch {
-	case strings.Contains(string(f), "backend \"gcs\"") || auto_added_backend == "gcs": // TODO: naif
+	case strings.Contains(string(f), "backend \"gcs\""):
 		err := tf.Init(ctx,
 			tfexec.BackendConfig(fmt.Sprintf("prefix=%s", b.prefix)),
 			tfexec.BackendConfig(fmt.Sprintf("bucket=%s", b.bucket)),
@@ -81,5 +79,10 @@ func (b GcpBackend) Apply(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (b GcpBackend) runMigration(ctx context.Context) error {
+
 	return nil
 }

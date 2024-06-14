@@ -18,21 +18,21 @@ type TfExecutable struct {
 	executable      *tfexec.Terraform
 	tf_backend      TfBackend
 	product_backend terraform_product.ProductBackend
-	tf_tenant       *terraform_tenant.TenantConfig
+	Tf_tenant       *terraform_tenant.TenantConfig
 }
 
 const SILO = "silo"
 const POOL = "pool"
 const HYBRID = "hybrid"
 
-func New(tf_working_dir, tf_executable string, tenant *terraform_tenant.TenantConfig, product_backend terraform_product.ProductBackend) (*TfExecutable, error) {
+func NewWorkspace(tf_working_dir, tf_executable string, tenant *terraform_tenant.TenantConfig, product_backend terraform_product.ProductBackend) (*TfExecutable, error) {
 	tenant_path := filepath.Join(tf_working_dir, "tenants", tenant.TenantId())
 
 	tf := &TfExecutable{
 		tenant_path:     tenant_path,
 		working_dir:     tf_working_dir,
 		product_backend: product_backend,
-		tf_tenant:       tenant,
+		Tf_tenant:       tenant,
 	}
 	var err error
 	// reset tenant dir

@@ -1,4 +1,4 @@
-package services
+package postgres
 
 import (
 	"errors"
@@ -8,12 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type InfrastructureService struct {
+type InfrastructureRepository struct {
 	db *provider.Database
 }
 
-func NewInfrastructureService(db *provider.Database) *InfrastructureService {
-	return &InfrastructureService{db: db}
+func NewInfrastructureRepository(db *provider.Database) *InfrastructureRepository {
+	return &InfrastructureRepository{db: db}
 }
 
 type infra_schema struct {
@@ -28,7 +28,7 @@ type infra_schema struct {
 
 var infra_row infra_schema
 
-func (i InfrastructureService) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
+func (i InfrastructureRepository) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
 	err := i.db.Raw("select * from infrastructures where product_id = ? and "+
 		"deployment_model = 'pool' and user_count < user_limit", product_id.String()).
 		Take(&infra_row).Error
@@ -40,12 +40,12 @@ func (i InfrastructureService) FindAvailablePoolForProduct(product_id vo.Product
 	}
 	return i.construct(infra_row)
 }
-func (i InfrastructureService) Persist(infra *Infrastructure.Infrastructure) error {
+func (i InfrastructureRepository) Persist(infra *Infrastructure.Infrastructure) error {
 
 	return nil
 }
 
-func (i InfrastructureService) Find(infra_id vo.InfrastructureId) (*Infrastructure.Infrastructure, error) {
+func (i InfrastructureRepository) Find(infra_id vo.InfrastructureId) (*Infrastructure.Infrastructure, error) {
 	err := i.db.Table("infrastructures").Where("id", infra_id.String()).
 		Take(&infra_row).Error
 	if err != nil {
@@ -57,7 +57,7 @@ func (i InfrastructureService) Find(infra_id vo.InfrastructureId) (*Infrastructu
 	return i.construct(infra_row)
 }
 
-func (i InfrastructureService) construct(infra_row infra_schema) (*Infrastructure.Infrastructure, error) {
+func (i InfrastructureRepository) construct(infra_row infra_schema) (*Infrastructure.Infrastructure, error) {
 	infra_id, err := vo.NewInfrastructureId(infra_row.Id)
 	if err != nil {
 		return nil, err

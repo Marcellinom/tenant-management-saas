@@ -1,7 +1,6 @@
 package terraform_product
 
 import (
-	"fmt"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"path/filepath"
@@ -23,7 +22,6 @@ func UsingGit(config *ProductConfig) ProductStoredOnGit {
 }
 
 func (g ProductStoredOnGit) CloneTo(path string) error {
-	fmt.Println("REPO NAME: ", g.repoName(g.product_config.product_url))
 	_, err := git.PlainClone(filepath.Join(path, g.repoName(g.product_config.product_url)), false, &git.CloneOptions{
 		URL:      g.product_config.product_url,
 		Progress: os.Stdout,

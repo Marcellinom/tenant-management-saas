@@ -16,8 +16,8 @@ func main() {
 	}
 	//gcp.Publish(context.TODO())
 	//go gcp.Subscribe(context.TODO())
-	startApp()
 	//testTerraform()
+	startApp()
 }
 
 func testTerraform() {
