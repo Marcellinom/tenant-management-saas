@@ -8,8 +8,7 @@ import (
 )
 
 type ProductBackend interface {
-	CloneTo(path string) error
-	DeleteOn(path string) error
+	CopyTo(path string) error
 	GetProductConfig() *ProductConfig
 }
 
@@ -21,7 +20,7 @@ func UsingGit(config *ProductConfig) ProductStoredOnGit {
 	return ProductStoredOnGit{product_config: config}
 }
 
-func (g ProductStoredOnGit) CloneTo(path string) error {
+func (g ProductStoredOnGit) CopyTo(path string) error {
 	_, err := git.PlainClone(filepath.Join(path, g.repoName(g.product_config.product_url)), false, &git.CloneOptions{
 		URL:      g.product_config.product_url,
 		Progress: os.Stdout,
@@ -29,11 +28,6 @@ func (g ProductStoredOnGit) CloneTo(path string) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-// TODO: implement this
-func (g ProductStoredOnGit) DeleteOn(path string) error {
 	return nil
 }
 

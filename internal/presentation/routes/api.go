@@ -12,7 +12,7 @@ import (
 func RegisterApis(app *provider.Application) {
 	tenant_repo := provider.Make[*postgres.TenantRepository](app, "tenant_repository")
 	product_repo := provider.Make[*postgres.ProductRepository](app, "product_repository")
-	event_service := provider.Make[event.DefaultRunner](app, "event_service")
+	event_service := provider.Make[*event.DefaultRunner](app, "event_service")
 
 	tenant_controller := controllers.NewTenantController(
 		commands.NewCreateTenantCommand(tenant_repo),

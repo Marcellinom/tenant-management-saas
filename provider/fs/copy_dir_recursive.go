@@ -22,7 +22,7 @@ func CopyDir(src string, dst string) error {
 		return err
 	}
 
-	if fds, err = ioutil.ReadDir(src); err != nil { // TODO: optimize later
+	if fds, err = ioutil.ReadDir(src); err != nil {
 		return err
 	}
 	for _, fd := range fds {

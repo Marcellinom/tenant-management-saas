@@ -9,24 +9,26 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
+	"github.com/Marcellinom/tenant-management-saas/pkg/gcp"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_product"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_tenant"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"os"
-	"time"
 )
 
 type TenantTierChangedListener struct {
-	product_repo repositories.ProductRepositoryInterface
-	infra_repo   repositories.InfrastructureRepositoryInterface
-	tenant_repo  repositories.TenantRepositoryInterface
+	product_repo  repositories.ProductRepositoryInterface
+	infra_repo    services.InfrastructureServiceInterface
+	tenant_repo   repositories.TenantRepositoryInterface
+	event_service event.Service
 }
 
-func NewTenantTierChangedListener(product_repo repositories.ProductRepositoryInterface, infra_repo repositories.InfrastructureRepositoryInterface, tenant_repo repositories.TenantRepositoryInterface) *TenantTierChangedListener {
-	return &TenantTierChangedListener{product_repo: product_repo, infra_repo: infra_repo, tenant_repo: tenant_repo}
+func NewTenantTierChangedListener(product_repo repositories.ProductRepositoryInterface, infra_repo services.InfrastructureServiceInterface, tenant_repo repositories.TenantRepositoryInterface, event_service event.Service) *TenantTierChangedListener {
+	return &TenantTierChangedListener{product_repo: product_repo, infra_repo: infra_repo, tenant_repo: tenant_repo, event_service: event_service}
 }
 
 func (r TenantTierChangedListener) Name() string {
@@ -66,13 +68,15 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	if err != nil {
 		return fmt.Errorf("gagal mengambil data tenant: %w", err)
 	}
+	if tenant.TenantStatus != Tenant.TENANT_TIER_CHANGING {
+		return fmt.Errorf("tenant tidak sedang dalam masa perubahan tier")
+	}
 	old_infrastructure, err := r.infra_repo.Find(tenant.InfrastructureId)
 	if err != nil {
 		return fmt.Errorf("gagal mengambil data infrastructure tenant: %w", err)
 	}
 
-	old_infrastructure.UserCount--
-	defer r.CleanUpInfrastructure(old_infrastructure)
+	defer r.CleanUpOldInfrastructure(old_infrastructure)
 
 	/**
 	 * target_product *Product.Product
@@ -93,7 +97,7 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("terjasi kesalahan dalam memroses executable terraform: %w", err)
 	}
 	fmt.Println("success initializing terraform workspace")
-	//defer tf.RemoveTenantDir()
+	defer tf.RemoveTenantDir()
 
 	var infra_to_use *Infrastructure.Infrastructure
 	var new_metadata []byte
@@ -108,28 +112,26 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 			if err != nil {
 				return fmt.Errorf("gagal melakukan migrasi tenant %w", err)
 			}
-			return r.delegateTenantToInfrastructure(tf, infra_to_use, tenant)
+			return r.delegateTenantToNewInfrastructure(infra_to_use, tenant)
 		}
-		infra_to_use = Infrastructure.CreatePoolConfig(target_product.ProductId, os.Getenv("GOOGLE_PROJECT_ID"))
+		infra_to_use = Infrastructure.CreatePoolConfig(target_product.ProductId)
 	case terraform.SILO:
-		infra_to_use = Infrastructure.CreateSiloConfig(target_product.ProductId, os.Getenv("GOOGLE_PROJECT_ID"))
+		infra_to_use = Infrastructure.CreateSiloConfig(target_product.ProductId)
 	}
+
 	tf.Tf_tenant.TenantEnv = append(tf.Tf_tenant.TenantEnv,
 		tfexec.Var(fmt.Sprintf("infrastructure_id=%s", infra_to_use.InfrastructureId.String())),
-		tfexec.Var(fmt.Sprintf("provider_id=%s", infra_to_use.ProviderId)),
+		tfexec.Var(fmt.Sprintf("provider_id=%s", os.Getenv("GOOGLE_PROJECT_ID"))),
 	)
-	tf.UseBackend(terraform.Gcp(os.Getenv("GOOGLE_BUCKET"), infra_to_use.Prefix))
+	tf.UseBackend(gcp.Backend(os.Getenv("GOOGLE_BUCKET"), infra_to_use.Prefix))
 
 	// di bawah ini konteksnya adalah ketika belum ada deployment tenant yang up
-	err = tf.Init(ctx)
-	if err != nil {
-		return fmt.Errorf("terjadi kesalahan dalam menginisialisasi terraform : %w", err)
-	}
-
-	err = tf.Deploy(ctx, 20*time.Minute)
+	// dengan begitu lakukan Deploy dan Migrate
+	err = tf.Deploy(ctx)
 	if err != nil {
 		return fmt.Errorf("kegagalan dalam melakukan deployment tenant: %w", err)
 	}
+
 	new_metadata, err = tf.GetMetaData(ctx)
 	if err != nil {
 		return fmt.Errorf("kegagalan dalam mengambil metadata deployment")
@@ -141,15 +143,29 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("gagal melakukan migrasi tenant %w", err)
 	}
 
-	return r.delegateTenantToInfrastructure(tf, infra_to_use, tenant)
+	return r.delegateTenantToNewInfrastructure(infra_to_use, tenant)
 }
 
-func (r TenantTierChangedListener) delegateTenantToInfrastructure(tf *terraform.TfExecutable, infra *Infrastructure.Infrastructure, tenant *Tenant.Tenant) error {
+func (r TenantTierChangedListener) delegateTenantToNewInfrastructure(infra *Infrastructure.Infrastructure, tenant *Tenant.Tenant) error {
+	if err := r.infra_repo.Persist(infra); err != nil {
+		return fmt.Errorf("gagal dalam persistansi data infrastruktur %s : %w", infra.InfrastructureId.String(), err)
+	}
+	r.event_service.Dispatch(events.TENANT_DELEGATED_TO_NEW_INFRASTRUCTURE, events.NewTenantDelegatedToNewInfrastructure(
+		tenant.TenantId.String(), infra.InfrastructureId.String(),
+	))
 	return nil
 }
 
-func (r TenantTierChangedListener) CleanUpInfrastructure(infra *Infrastructure.Infrastructure) {
-
+func (r TenantTierChangedListener) CleanUpOldInfrastructure(infra *Infrastructure.Infrastructure) error {
+	// kalo pool, pool nya bisa dipake lagi,
+	// walaupun pool nya kosong yo ndak papa
+	if infra.DeploymentModel == terraform.SILO {
+		if err := r.infra_repo.MarkDeleted(infra.InfrastructureId); err != nil {
+			return err
+		}
+		r.event_service.Dispatch(events.INFRASTRUCTURE_DESTROYED, events.NewInfrastructureDestroyed(infra.InfrastructureId.String()))
+	}
+	return nil
 }
 
 func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTierChanged) (*Product.Product, *terraform_product.ProductConfig, error) {
@@ -167,10 +183,10 @@ func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTie
 	}
 
 	var product_deployment_schema struct {
-		TfRepoUrl        string              `json:"terraform_repository_url"`
-		TfEntryPointDir  string              `json:"terraform_entrypoint_dir"`
-		ScriptEntrypoint string              `json:"script_entrypoint,omitempty"`
-		Infra            []map[string]string `json:"infrastructure_blueprint"`
+		TfRepoUrl       string              `json:"terraform_repository_url"`
+		TfEntryPointDir string              `json:"terraform_entrypoint_dir"`
+		MigrationFile   string              `json:"migrate_entrypoint,omitempty"`
+		Infra           []map[string]string `json:"infrastructure_blueprint"`
 	}
 	err = json.Unmarshal(target_product.DeploymentSchema, &product_deployment_schema)
 	if err != nil {
@@ -179,6 +195,6 @@ func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTie
 	return target_product, terraform_product.NewProductConfig(
 		product_deployment_schema.TfRepoUrl,
 		product_deployment_schema.TfEntryPointDir,
-		product_deployment_schema.ScriptEntrypoint,
+		product_deployment_schema.MigrationFile,
 	), nil
 }

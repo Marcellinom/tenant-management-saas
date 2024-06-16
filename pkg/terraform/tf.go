@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_product"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_tenant"
-	"github.com/Marcellinom/tenant-management-saas/provider/fs"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"os"
 	"path/filepath"
@@ -14,6 +13,8 @@ import (
 
 type TfExecutable struct {
 	working_dir, tenant_path string
+
+	initialized bool
 
 	executable      *tfexec.Terraform
 	tf_backend      TfBackend
@@ -56,6 +57,10 @@ func NewWorkspace(tf_working_dir, tf_executable string, tenant *terraform_tenant
 
 	tf.executable = tf_exec
 
+	if os.Getenv("APP_DEBUG") == "true" {
+		tf.executable.SetStdout(os.Stdout)
+	}
+
 	return tf, nil
 }
 
@@ -73,7 +78,7 @@ func (t *TfExecutable) UseBackend(backend TfBackend) *TfExecutable {
 	return t
 }
 
-func (t *TfExecutable) Init(ctx context.Context) error {
+func (t *TfExecutable) initTerraform(ctx context.Context) error {
 	var err error
 	if t.tf_backend != nil {
 		ctx = context.WithValue(ctx, "terraform", t.executable)
@@ -82,7 +87,7 @@ func (t *TfExecutable) Init(ctx context.Context) error {
 		err = t.executable.Init(ctx)
 	}
 	if err != nil {
-		return fmt.Errorf("gagal menginisialisasi terraform pad dir: %s, err: %w", t.executable.WorkingDir(), err)
+		return fmt.Errorf("gagal menginisialisasi terraform pada dir: %s, err: %w", t.executable.WorkingDir(), err)
 	}
 	return nil
 }
@@ -93,23 +98,9 @@ func (t *TfExecutable) initProduct() error {
 	rw.Lock()
 	defer rw.Unlock()
 
-	err = t.product_backend.CloneTo(t.tenant_path)
+	err = t.product_backend.CopyTo(t.tenant_path)
 	if err != nil {
 		return fmt.Errorf("gagal dalam cloning product config dari remote: %w", err)
-	}
-	return nil
-}
-
-func (t *TfExecutable) copyProductConfigToTenant() error {
-	var err error
-	var rw sync.RWMutex
-	rw.Lock()
-	defer rw.Unlock()
-
-	// TODO: ALERT! copy specific tier to tenant only
-	err = fs.CopyDir(filepath.Join(t.tenant_path, t.product_backend.GetProductConfig().GetTfEntrypoint()), t.tenant_path)
-	if err != nil {
-		return fmt.Errorf("gagal memberikan config produk kepada folder tenant: %w", err)
 	}
 	return nil
 }

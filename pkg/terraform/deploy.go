@@ -8,7 +8,11 @@ import (
 
 func (t *TfExecutable) Deploy(ctx context.Context, timeout ...time.Duration) error {
 	var err error
-
+	if !t.initialized {
+		if err = t.initTerraform(ctx); err != nil {
+			return err
+		}
+	}
 	apply_variables := make([]tfexec.ApplyOption, len(t.Tf_tenant.TenantEnv))
 	for i, v := range t.Tf_tenant.TenantEnv {
 		apply_variables[i] = v

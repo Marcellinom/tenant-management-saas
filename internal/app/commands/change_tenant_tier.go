@@ -62,11 +62,11 @@ func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTi
 		return errors.ExpectationFailed(2004, fmt.Sprintf("kesalahan dalam mengubah status tenant: %s", err.Error()))
 	}
 
-	//err = c.tenant_repo.Persist(tenant)
-	//if err != nil {
-	//	return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
-	//}
+	err = c.tenant_repo.Persist(tenant)
+	if err != nil {
+		return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
+	}
 
-	c.event_service.Dispatch("tenant_tier_changed", events.NewTenantTierChanged(tenant.TenantId.String(), product_id.String()))
+	c.event_service.Dispatch(events.TENANT_TIER_CHANGED, events.NewTenantTierChanged(tenant.TenantId.String(), product_id.String()))
 	return nil
 }

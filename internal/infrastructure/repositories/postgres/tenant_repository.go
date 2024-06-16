@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"errors"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider"
@@ -29,6 +30,9 @@ func (t TenantRepository) Find(tenant_id vo.TenantId) (*Tenant.Tenant, error) {
 	err := t.db.Table("tenants").Where("id", tenant_id.String()).
 		Take(&tenant_data).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 

@@ -22,8 +22,8 @@ func (r DefaultRunner) GetListenersForEvent(event string) []Handler {
 	return v
 }
 
-func NewDefaultRunner(app *provider.Application) DefaultRunner {
-	return DefaultRunner{app: app, handler: make(map[string][]Handler)}
+func NewDefaultRunner(app *provider.Application) *DefaultRunner {
+	return &DefaultRunner{app: app, handler: make(map[string][]Handler)}
 }
 
 func (r DefaultRunner) run(event_name string, listener Listener, payload Event, timeout time.Duration) {
@@ -51,7 +51,7 @@ func (r DefaultRunner) run(event_name string, listener Listener, payload Event, 
 	case <-runner_context.Done():
 		if errors.As(runner_context.Err(), &context.DeadlineExceeded) {
 			fmt.Println(runner_context.Err())
-			MarkAsFailed(r.app, event_name, listener.Name(), runner_context.Err().Error(), metadata, listener.MaxRetries())
+			MarkAsFailed(r.app, event_name, listener.Name(), runner_context.Err().Error(), metadata, listener.MaxRetries(), "timeout")
 			return
 		}
 	}
