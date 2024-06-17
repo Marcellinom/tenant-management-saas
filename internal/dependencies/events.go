@@ -5,13 +5,14 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/repositories/postgres"
 	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/services"
+	"github.com/Marcellinom/tenant-management-saas/pkg/gcp"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 	"time"
 )
 
 func RegisterEvents(app *provider.Application) {
-	event_service := provider.Make[*event.DefaultRunner](app, "event_service")
+	event_service := provider.Make[*gcp.PubSub](app, "event_service")
 	infra_service := provider.Make[*services.InfrastructureService](app, "infrastructure_service")
 	tenant_repo := provider.Make[*postgres.TenantRepository](app, "tenant_repository")
 	product_repo := provider.Make[*postgres.ProductRepository](app, "product_repository")
@@ -40,6 +41,13 @@ func RegisterEvents(app *provider.Application) {
 		{
 			Timeout:  15 * time.Minute,
 			Listener: listeners.NewDestroyingInfrastructureListener(infra_service),
+		},
+	})
+
+	event_service.RegisterListeners("ngetes", []event.Handler{
+		{
+			Timeout:  1 * time.Minute,
+			Listener: listeners.NewTesListener(),
 		},
 	})
 }

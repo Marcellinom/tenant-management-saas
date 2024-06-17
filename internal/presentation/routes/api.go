@@ -4,15 +4,15 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/app/commands"
 	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/repositories/postgres"
 	"github.com/Marcellinom/tenant-management-saas/internal/presentation/controllers"
+	"github.com/Marcellinom/tenant-management-saas/pkg/gcp"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/auth"
-	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
 
 func RegisterApis(app *provider.Application) {
 	tenant_repo := provider.Make[*postgres.TenantRepository](app, "tenant_repository")
 	product_repo := provider.Make[*postgres.ProductRepository](app, "product_repository")
-	event_service := provider.Make[*event.DefaultRunner](app, "event_service")
+	event_service := provider.Make[*gcp.PubSub](app, "event_service")
 
 	tenant_controller := controllers.NewTenantController(
 		commands.NewCreateTenantCommand(tenant_repo),
