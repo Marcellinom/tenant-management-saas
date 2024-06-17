@@ -10,16 +10,21 @@ import (
 	"os"
 )
 
+type INFRA_SERVICE = *services.InfrastructureService
+type PRODUCT_REPO = *postgres.ProductRepository
+type TENANT_REPO = *postgres.TenantRepository
+type EVENT_SERVICE = *gcp.PubSub
+type ORGANIZATION_QUERY = *iam.OrganizationQuery
+
 func RegisterBindings(app *provider.Application) {
-	provider.Bind(app, "infrastructure_service", services.NewInfrastructureService(app.DefaultDatabase()))
-	provider.Bind(app, "product_repository", postgres.NewProductRepository(app.DefaultDatabase()))
-	provider.Bind(app, "tenant_repository", postgres.NewTenantRepository(app.DefaultDatabase()))
-	//provider.Bind(app, "event_service", event.NewDefaultRunner(app))
-	provider.Bind(app, "event_service", gcp.NewPubSub(app, "tenant_management"))
+	provider.Bind[INFRA_SERVICE](app, services.NewInfrastructureService(app.DefaultDatabase()))
+	provider.Bind[PRODUCT_REPO](app, postgres.NewProductRepository(app.DefaultDatabase()))
+	provider.Bind[TENANT_REPO](app, postgres.NewTenantRepository(app.DefaultDatabase()))
+	provider.Bind[EVENT_SERVICE](app, gcp.NewPubSub(app, os.Getenv("MODULE_NAME")))
 
 	iam_db, exists := app.UseConnection(os.Getenv("IAM_DB_CONNECTION"))
 	if !exists {
-		log.Panicf("koneksi %s belum di set up", os.Getenv("IAM_DB_CONNECTION"))
+		log.Panicf("koneksi %s belum diset up", os.Getenv("IAM_DB_CONNECTION"))
 	}
-	provider.Bind(app, "organization_query", iam.NewOrganizationQuery(iam_db))
+	provider.Bind[ORGANIZATION_QUERY](app, iam.NewOrganizationQuery(iam_db))
 }

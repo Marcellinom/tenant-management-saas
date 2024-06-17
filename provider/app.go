@@ -40,16 +40,16 @@ func (a Application) UseConnection(name string) (*Database, bool) {
 	return v, exists
 }
 
-func Bind[T any](app *Application, label string, dependency T) {
-	do.ProvideNamed[T](app.i, label, func(injector *do.Injector) (T, error) {
+func Bind[T any](app *Application, dependency T) {
+	do.Provide[T](app.i, func(injector *do.Injector) (T, error) {
 		return dependency, nil
 	})
 }
 
-func Make[T any](app *Application, label string) T {
-	d, err := do.InvokeNamed[T](app.i, label)
+func Make[T any](app *Application) T {
+	d, err := do.Invoke[T](app.i)
 	if err != nil {
-		panic(fmt.Errorf("error when creating object %s: %w", label, err))
+		panic(fmt.Errorf("error when creating object %T: %w", new(T), err))
 	}
 	return d
 }

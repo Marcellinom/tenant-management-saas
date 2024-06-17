@@ -3,19 +3,16 @@ package dependencies
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/app/listeners"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
-	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/repositories/postgres"
-	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/services"
-	"github.com/Marcellinom/tenant-management-saas/pkg/gcp"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 	"time"
 )
 
 func RegisterEvents(app *provider.Application) {
-	event_service := provider.Make[*gcp.PubSub](app, "event_service")
-	infra_service := provider.Make[*services.InfrastructureService](app, "infrastructure_service")
-	tenant_repo := provider.Make[*postgres.TenantRepository](app, "tenant_repository")
-	product_repo := provider.Make[*postgres.ProductRepository](app, "product_repository")
+	event_service := provider.Make[EVENT_SERVICE](app)
+	infra_service := provider.Make[INFRA_SERVICE](app)
+	tenant_repo := provider.Make[TENANT_REPO](app)
+	product_repo := provider.Make[PRODUCT_REPO](app)
 
 	event_service.RegisterListeners(events.TENANT_TIER_CHANGED, []event.Handler{
 		{
