@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/Marcellinom/tenant-management-saas/provider/auth"
 	"github.com/samber/do"
 	"os"
 )
@@ -9,7 +10,20 @@ import (
 type Application struct {
 	engine   *WebEngine
 	database *Connection
+	auth     *auth.Authenticator
 	i        *do.Injector
+}
+
+func (a Application) Auth() *auth.Authenticator {
+	return a.auth
+}
+
+func (a Application) RegisterAuth() {
+	a.auth.RegisterCallback(a.engine)
+}
+
+func NewApplication(engine *WebEngine, database *Connection, auth *auth.Authenticator) *Application {
+	return &Application{engine: engine, database: database, auth: auth}
 }
 
 func (a Application) Engine() *WebEngine {
@@ -23,10 +37,6 @@ func (a Application) DefaultDatabase() *Database {
 
 func (a Application) Databases() *Connection {
 	return a.database
-}
-
-func NewApplication(web_engine *WebEngine, db_connections *Connection) *Application {
-	return &Application{engine: web_engine, database: db_connections, i: do.DefaultInjector}
 }
 
 func Bind[T any](app *Application, label string, dependency T) {

@@ -9,6 +9,7 @@ import (
 func RegisterApplication(app *provider.Application) {
 	dependencies.RegisterBindings(app)
 	dependencies.RegisterEvents(app)
-	//routes.RegisterRoutes(app)
+	app.RegisterAuth()
+	routes.RegisterRoutes(app)
 	routes.RegisterApis(app)
 }

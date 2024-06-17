@@ -19,9 +19,9 @@ func RegisterApis(app *provider.Application) {
 		commands.NewChangeTenantTierCommand(tenant_repo, product_repo, event_service),
 	)
 
-	r := app.Engine().Group("/api").Use(auth.IsAuthenticated)
+	app.Engine().Use(auth.CORSMiddleware("https://api-iam.34d.me"))
 
-	r.Use(auth.CORSMiddleware())
+	r := app.Engine().Group("/api").Use(auth.IsAuthenticated)
 
 	r.POST("/create_tenant", tenant_controller.CreateTenant)
 

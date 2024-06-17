@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"github.com/Marcellinom/tenant-management-saas/provider/errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"strings"
 )
 
@@ -12,16 +13,14 @@ func IsAuthenticated(ctx *gin.Context) {
 	authorizationHeader := ctx.Request.Header.Get("Authorization")
 
 	if authorizationHeader == "" {
-		unauthorized := errors.Unauthorized(8000, "Unauthorized")
-		ctx.AbortWithError(unauthorized.Status(), unauthorized)
+		ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("unauthorized"))
 		return
 	}
 
 	token := authorizationHeader[len("Bearer "):]
 	claims, err := decodeJWT(token)
 	if err != nil {
-		unauthorized := errors.Unauthorized(8000, "Invalid JWT Token")
-		ctx.AbortWithError(unauthorized.Status(), unauthorized)
+		ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("invalid JWT Token"))
 		return
 	}
 	ctx.Set("token", claims)

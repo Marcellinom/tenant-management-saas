@@ -59,15 +59,15 @@ func startApp() {
 	if err != nil {
 		log.Panic(err)
 	}
-	app := provider.NewApplication(engine, db_connections)
 
-	iam, err := auth.New()
+	iam, err := auth.New(os.Getenv("AUTH_PROVIDER"))
 	if err != nil {
 		log.Panic(err)
 	}
 
+	app := provider.NewApplication(engine, db_connections, iam)
+
 	internal.RegisterApplication(app)
-	iam.RegisterCallback(engine)
 
 	if engine_cfg.Port == "" {
 		engine_cfg.Port = "8080"
