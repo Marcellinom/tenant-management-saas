@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/app/commands"
+	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/iam"
 	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/repositories/postgres"
 	"github.com/Marcellinom/tenant-management-saas/internal/presentation/controllers"
 	"github.com/Marcellinom/tenant-management-saas/pkg/gcp"
@@ -19,11 +20,23 @@ func RegisterApis(app *provider.Application) {
 		commands.NewChangeTenantTierCommand(tenant_repo, product_repo, event_service),
 	)
 
-	app.Engine().Use(auth.CORSMiddleware("https://api-iam.34d.me"))
+	organization_query := provider.Make[*iam.OrganizationQuery](app, "organization_query")
+	organization_controller := controllers.NewOrganizationController(organization_query)
 
-	r := app.Engine().Group("/api").Use(auth.IsAuthenticated)
+	app.Engine().Use(auth.CORSMiddleware("http://localhost:3000", "https://api-iam.34d.me"))
 
-	r.POST("/create_tenant", tenant_controller.CreateTenant)
+	r := app.Engine().Group("/api")
+	r.Use(auth.IsAuthenticated)
 
-	r.POST("/change_tier", tenant_controller.ChangeTenantTier)
+	o := r.Group("/organization")
+	{
+		o.GET("/", organization_controller.List)
+		o.POST("/")
+	}
+
+	t := r.Group("/tenant")
+	{
+		t.POST("/", tenant_controller.CreateTenant)
+		t.POST("/change_tier", tenant_controller.ChangeTenantTier)
+	}
 }

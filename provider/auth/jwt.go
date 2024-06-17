@@ -9,18 +9,25 @@ import (
 
 func decodeJWT(token string) (*IamToken, error) {
 	claims := &IamToken{}
-	tokenInstance, err := new(jwt.Parser).ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %s", token.Header["alg"])
+	var err error
+	var tokenInstance *jwt.Token
+
+	if os.Getenv("APP_DEBUG") == "true" {
+		tokenInstance, _, err = new(jwt.Parser).ParseUnverified(token, claims)
+	} else {
+		tokenInstance, err = new(jwt.Parser).ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %s", token.Header["alg"])
+			}
+			return os.Getenv("JWT_SECRET"), nil
+		})
+		if !tokenInstance.Valid {
+			return nil, fmt.Errorf("invalid token: %")
 		}
-		return os.Getenv("JWT_SECRET"), nil
-	})
-	if err != nil {
-		return nil, err
 	}
 
-	if !tokenInstance.Valid {
-		return nil, fmt.Errorf("invalid token")
+	if err != nil {
+		return nil, err
 	}
 
 	return claims, nil
@@ -32,7 +39,7 @@ type IamToken struct {
 	IssuedAt   int64  `json:"iat,omitempty"`
 	Name       string `json:"name,omitempty"`
 	PictureUrl string `json:"picture,omitempty"`
-	OrgId      string `json:"sub,omitempty"`
+	UserId     string `json:"sub,omitempty"`
 }
 
 // Valid Validates time based claims "exp, iat, nbf".

@@ -35,8 +35,9 @@ func (a Application) DefaultDatabase() *Database {
 	return databases[os.Getenv("DB_CONNECTION")]
 }
 
-func (a Application) Databases() *Connection {
-	return a.database
+func (a Application) UseConnection(name string) (*Database, bool) {
+	v, exists := (*a.database)[name]
+	return v, exists
 }
 
 func Bind[T any](app *Application, label string, dependency T) {

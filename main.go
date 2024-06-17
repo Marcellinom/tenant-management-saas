@@ -53,8 +53,19 @@ func startApp() {
 		os.Getenv("DB_DATABASE"),
 	)
 
+	iam_database := provider.NewConnectionConfig(
+		os.Getenv("IAM_DB_CONNECTION"),
+		os.Getenv("IAM_DB_DRIVER"),
+		os.Getenv("IAM_DB_USER"),
+		os.Getenv("IAM_DB_PASSWORD"),
+		os.Getenv("IAM_DB_HOST"),
+		os.Getenv("IAM_DB_PORT"),
+		os.Getenv("IAM_DB_DATABASE"),
+	)
+
 	db_connections, err := provider.SetupDatabase([]provider.ConnectionConfig{
 		tm_database,
+		iam_database,
 	})
 	if err != nil {
 		log.Panic(err)
