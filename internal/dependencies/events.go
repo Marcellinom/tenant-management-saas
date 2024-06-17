@@ -43,11 +43,4 @@ func RegisterEvents(app *provider.Application) {
 			Listener: listeners.NewDestroyingInfrastructureListener(infra_service),
 		},
 	})
-
-	event_service.RegisterListeners("ngetes", []event.Handler{
-		{
-			Timeout:  1 * time.Minute,
-			Listener: listeners.NewTesListener(),
-		},
-	})
 }
