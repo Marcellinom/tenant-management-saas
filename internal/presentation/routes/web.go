@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// RegisterRoutes deprecated
 func RegisterRoutes(app *provider.Application) {
 	route := app.Engine()
 

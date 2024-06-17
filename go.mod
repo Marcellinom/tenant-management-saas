@@ -24,6 +24,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.2.2 // indirect

@@ -13,7 +13,7 @@ func (e UnauthorizedError) Error() string {
 func Unauthorized(code int, message string) UnauthorizedError {
 	e := UnauthorizedError{}
 	e.code = code
-	e.status = http.StatusBadRequest
+	e.status = http.StatusUnauthorized
 	e.message = message
 	return e
 }
