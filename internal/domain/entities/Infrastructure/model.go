@@ -13,6 +13,8 @@ type Infrastructure struct {
 	Metadata         []byte              `json:"metadata"`
 	DeploymentModel  string              `json:"deployment_model"`
 	Prefix           string              `json:"prefix"` // prefix buat nyimpen tfstate nya di remote
+
+	ServingUrl string `json:"serving_url"`
 }
 
 func CreatePoolConfig(product_id vo.ProductId) *Infrastructure {
@@ -20,7 +22,7 @@ func CreatePoolConfig(product_id vo.ProductId) *Infrastructure {
 	return &Infrastructure{
 		InfrastructureId: infra_id,
 		ProductId:        product_id,
-		UserCount:        0,
+		UserCount:        1,
 		MaxUser:          100,
 		DeploymentModel:  "pool",
 		Prefix:           fmt.Sprintf("infrastructures/%s", infra_id.String()),
@@ -32,7 +34,7 @@ func CreateSiloConfig(product_id vo.ProductId) *Infrastructure {
 	return &Infrastructure{
 		InfrastructureId: infra_id,
 		ProductId:        product_id,
-		UserCount:        0,
+		UserCount:        1,
 		MaxUser:          1,
 		DeploymentModel:  "silo",
 		Prefix:           fmt.Sprintf("infrastructures/%s", infra_id.String()),

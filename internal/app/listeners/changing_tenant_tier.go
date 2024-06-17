@@ -137,13 +137,29 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("kegagalan dalam mengambil metadata deployment")
 	}
 
+	var m struct {
+		ServingUrl string `json:"serving_url,omitempty"`
+	}
+	json.Unmarshal(new_metadata, &m)
+	infra_to_use.ServingUrl = m.ServingUrl
+
 	infra_to_use.Metadata = new_metadata
 	err = tf.Migrate(ctx, old_infrastructure.Metadata, infra_to_use.Metadata)
 	if err != nil {
 		return fmt.Errorf("gagal melakukan migrasi tenant %w", err)
 	}
 
+	r.registerNewDomain(tenant, target_product, infra_to_use)
 	return r.delegateTenantToNewInfrastructure(infra_to_use, tenant)
+}
+
+func (r TenantTierChangedListener) registerNewDomain(tenant *Tenant.Tenant, target_product *Product.Product, new_infra *Infrastructure.Infrastructure) {
+	r.event_service.Dispatch(events.NEW_DOMAIN_REGISTERED, events.NewDomainRegistered(
+		target_product.AppId.Value(),
+		tenant.TenantId.String(),
+		tenant.OrganizationId.String(),
+		new_infra.ServingUrl,
+	))
 }
 
 func (r TenantTierChangedListener) delegateTenantToNewInfrastructure(infra *Infrastructure.Infrastructure, tenant *Tenant.Tenant) error {

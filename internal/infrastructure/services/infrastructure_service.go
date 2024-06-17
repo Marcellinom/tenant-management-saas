@@ -25,6 +25,7 @@ type infra_schema struct {
 	UserLimit       int
 	DeploymentModel string
 	Prefix          string
+	ServingUrl      string
 }
 
 func (i InfrastructureService) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
@@ -111,5 +112,6 @@ func (i InfrastructureService) construct(infra_row infra_schema) (*Infrastructur
 		Metadata:         infra_row.Metadata,
 		DeploymentModel:  infra_row.DeploymentModel,
 		Prefix:           infra_row.Prefix,
+		ServingUrl:       infra_row.ServingUrl,
 	}, nil
 }
