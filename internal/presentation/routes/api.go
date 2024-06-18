@@ -22,7 +22,12 @@ func RegisterApis(app *provider.Application) {
 	organization_query := provider.Make[*iam.OrganizationQuery](app)
 	organization_controller := controllers.NewOrganizationController(organization_query)
 
-	app.Engine().Use(auth.CORSMiddleware())
+	app.Engine().Use(auth.CORSMiddleware(
+		"http://localhost:3000",
+		"https://api-onboarding.34d.me",
+		"https://onboarding.34d.me",
+		"https://api-iam.34d.me",
+	))
 
 	r := app.Engine().Group("/api")
 	r.Use(auth.IsAuthenticated)
