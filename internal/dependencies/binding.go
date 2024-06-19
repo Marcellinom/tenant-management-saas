@@ -9,14 +9,14 @@ import (
 	"os"
 )
 
-type INFRA_SERVICE = *postgres.InfrastructureRepository
+type INFRA_REPO = *postgres.InfrastructureRepository
 type PRODUCT_REPO = *postgres.ProductRepository
 type TENANT_REPO = *postgres.TenantRepository
 type EVENT_SERVICE = *gcp.PubSub
 type ORGANIZATION_QUERY = *iam.OrganizationQuery
 
 func RegisterBindings(app *provider.Application) {
-	provider.Bind[INFRA_SERVICE](app, postgres.NewInfrastructureService(app.DefaultDatabase()))
+	provider.Bind[INFRA_REPO](app, postgres.NewInfrastructureService(app.DefaultDatabase()))
 	provider.Bind[PRODUCT_REPO](app, postgres.NewProductRepository(app.DefaultDatabase()))
 	provider.Bind[TENANT_REPO](app, postgres.NewTenantRepository(app.DefaultDatabase()))
 	provider.Bind[EVENT_SERVICE](app, gcp.NewPubSub(app, os.Getenv("MODULE_NAME")))

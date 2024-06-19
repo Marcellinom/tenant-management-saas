@@ -14,25 +14,7 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Panic("Error loading .env file", err)
 	}
-	//gcp.Publish(context.TODO())
-	//go gcp.Subscribe(context.TODO())
-	//testTerraform()
 	startApp()
-}
-
-func testTerraform() {
-	//tenant_id := "alex"
-	////gcs_bucket := gcp.Bucket("saas-tf-config", "tenants")
-	//terraform.New("E:\\1kuliah\\TA\\code\\tenant-management\\terraform").
-	//	NewTenantConfig(
-	//		tenant_id,
-	//		"list-foto-product",
-	//		terraform.SILO,
-	//		*tfexec.Var(fmt.Sprintf("tenant_id=%s", tenant_id)),
-	//	).
-	//	UseBackend(terraform.BuiltinBackend("saas-tf-config", "tenants")).
-	//	//UseBackend(gcs_bucket).
-	//	Apply()
 }
 
 func startApp() {
