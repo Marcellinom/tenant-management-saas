@@ -3,15 +3,15 @@ package listeners
 import (
 	"context"
 	"fmt"
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
 
 type DestroyingInfrastructureListener struct {
-	infra_service services.InfrastructureServiceInterface
+	infra_service repositories.InfrastructureRepositoryInterface
 }
 
-func NewDestroyingInfrastructureListener(infra_service services.InfrastructureServiceInterface) *DestroyingInfrastructureListener {
+func NewDestroyingInfrastructureListener(infra_service repositories.InfrastructureRepositoryInterface) *DestroyingInfrastructureListener {
 	return &DestroyingInfrastructureListener{infra_service: infra_service}
 }
 

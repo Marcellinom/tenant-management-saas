@@ -9,7 +9,6 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/pkg/gcp"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
@@ -22,12 +21,12 @@ import (
 
 type TenantTierChangedListener struct {
 	product_repo  repositories.ProductRepositoryInterface
-	infra_repo    services.InfrastructureServiceInterface
+	infra_repo    repositories.InfrastructureRepositoryInterface
 	tenant_repo   repositories.TenantRepositoryInterface
 	event_service event.Service
 }
 
-func NewTenantTierChangedListener(product_repo repositories.ProductRepositoryInterface, infra_repo services.InfrastructureServiceInterface, tenant_repo repositories.TenantRepositoryInterface, event_service event.Service) *TenantTierChangedListener {
+func NewTenantTierChangedListener(product_repo repositories.ProductRepositoryInterface, infra_repo repositories.InfrastructureRepositoryInterface, tenant_repo repositories.TenantRepositoryInterface, event_service event.Service) *TenantTierChangedListener {
 	return &TenantTierChangedListener{product_repo: product_repo, infra_repo: infra_repo, tenant_repo: tenant_repo, event_service: event_service}
 }
 

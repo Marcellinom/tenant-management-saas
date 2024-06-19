@@ -6,17 +6,16 @@ import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
 
 type TenantDelegationToInfrastructure struct {
 	tenant_repo   repositories.TenantRepositoryInterface
-	infra_service services.InfrastructureServiceInterface
+	infra_service repositories.InfrastructureRepositoryInterface
 }
 
-func NewTenantDelegationToInfrastructure(tenant_repo repositories.TenantRepositoryInterface, infra_service services.InfrastructureServiceInterface) *TenantDelegationToInfrastructure {
+func NewTenantDelegationToInfrastructure(tenant_repo repositories.TenantRepositoryInterface, infra_service repositories.InfrastructureRepositoryInterface) *TenantDelegationToInfrastructure {
 	return &TenantDelegationToInfrastructure{tenant_repo: tenant_repo, infra_service: infra_service}
 }
 

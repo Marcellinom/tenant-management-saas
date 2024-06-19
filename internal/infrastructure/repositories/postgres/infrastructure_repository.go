@@ -1,4 +1,4 @@
-package services
+package postgres
 
 import (
 	"errors"
@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-type InfrastructureService struct {
+type InfrastructureRepository struct {
 	db *provider.Database
 }
 
-func NewInfrastructureService(db *provider.Database) *InfrastructureService {
-	return &InfrastructureService{db: db}
+func NewInfrastructureService(db *provider.Database) *InfrastructureRepository {
+	return &InfrastructureRepository{db: db}
 }
 
 type infra_schema struct {
@@ -28,7 +28,7 @@ type infra_schema struct {
 	ServingUrl      string
 }
 
-func (i InfrastructureService) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
+func (i InfrastructureRepository) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
 	var infra_row infra_schema
 	err := i.db.Raw("select id, product_id, metadata, "+
 		"(select count(infrastructure_id) from tenants t where t.infrastructure_id = i.id and t.status = 'activated') as user_count, "+
@@ -45,7 +45,7 @@ func (i InfrastructureService) FindAvailablePoolForProduct(product_id vo.Product
 	}
 	return i.construct(infra_row)
 }
-func (i InfrastructureService) Persist(infra *Infrastructure.Infrastructure) error {
+func (i InfrastructureRepository) Persist(infra *Infrastructure.Infrastructure) error {
 	i.db.Transaction(func(tx *gorm.DB) error {
 		var row int64
 		err := tx.Table("infrastructures").Where("id", infra.InfrastructureId.String()).
@@ -73,14 +73,14 @@ func (i InfrastructureService) Persist(infra *Infrastructure.Infrastructure) err
 	return nil
 }
 
-func (i InfrastructureService) MarkDeleted(id vo.InfrastructureId) error {
+func (i InfrastructureRepository) MarkDeleted(id vo.InfrastructureId) error {
 	return i.db.Transaction(func(tx *gorm.DB) error {
 		return tx.Table("infrastructures").Where("id", id.String()).
 			Update("deleted_at", time.Now()).Error
 	})
 }
 
-func (i InfrastructureService) Find(infra_id vo.InfrastructureId) (*Infrastructure.Infrastructure, error) {
+func (i InfrastructureRepository) Find(infra_id vo.InfrastructureId) (*Infrastructure.Infrastructure, error) {
 	var infra_row infra_schema
 	err := i.db.Table("infrastructures").
 		Where("id", infra_id.String()).
@@ -95,7 +95,7 @@ func (i InfrastructureService) Find(infra_id vo.InfrastructureId) (*Infrastructu
 	return i.construct(infra_row)
 }
 
-func (i InfrastructureService) construct(infra_row infra_schema) (*Infrastructure.Infrastructure, error) {
+func (i InfrastructureRepository) construct(infra_row infra_schema) (*Infrastructure.Infrastructure, error) {
 	infra_id, err := vo.NewInfrastructureId(infra_row.Id)
 	if err != nil {
 		return nil, err
