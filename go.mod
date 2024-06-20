@@ -6,11 +6,10 @@ toolchain go1.21.9
 
 require (
 	cloud.google.com/go/pubsub v1.38.0
-	cloud.google.com/go/storage v1.41.0
-	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.20.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/samber/do v1.6.0
@@ -23,8 +22,6 @@ require (
 	cloud.google.com/go/iam v1.1.8 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.2.2 // indirect
