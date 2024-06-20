@@ -10,6 +10,6 @@ func RegisterApplication(app *provider.Application) {
 	dependencies.RegisterBindings(app)
 	dependencies.RegisterEvents(app)
 	app.RegisterAuth()
-	routes.RegisterRoutes(app)
+	//routes.RegisterRoutes(app)
 	routes.RegisterApis(app)
 }
