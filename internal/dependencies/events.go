@@ -13,11 +13,12 @@ func RegisterEvents(app *provider.Application) {
 	tenant_repo := provider.Make[TENANT_REPO](app)
 	product_repo := provider.Make[PRODUCT_REPO](app)
 
+	deployer_service := provider.Make[DEPLOYER_SERVICE](app)
 	event_service := provider.Make[EVENT_SERVICE](app)
 	event_service.RegisterListeners(events.TENANT_TIER_CHANGED, []event.Handler{
 		{
 			Timeout:  15 * time.Minute,
-			Listener: listeners.NewTenantTierChangedListener(product_repo, infra_repo, tenant_repo, event_service),
+			Listener: listeners.NewTenantTierChangedListener(product_repo, infra_repo, tenant_repo, deployer_service),
 		},
 		{
 			Timeout:  3 * time.Minute,
