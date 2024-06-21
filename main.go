@@ -16,7 +16,7 @@ func main() {
 		fmt.Println("tidak ada .env file yang terdeteksi", err)
 	}
 	if os.Getenv("APP_DEBUG") == "true" {
-		fmt.Println(os.Getenv("GOOGLE_CREDS_PATH"))
+		fmt.Println("GCP CREDS PATH:", os.Getenv("GOOGLE_CREDS_PATH"))
 	}
 	startApp()
 }
