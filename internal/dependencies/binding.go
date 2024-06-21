@@ -2,7 +2,7 @@ package dependencies
 
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/iam"
-	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/repositories/postgres"
+	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/postgres/postgres"
 	"github.com/Marcellinom/tenant-management-saas/internal/infrastructure/services"
 	"github.com/Marcellinom/tenant-management-saas/pkg/gcp"
 	"github.com/Marcellinom/tenant-management-saas/provider"
