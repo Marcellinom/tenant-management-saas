@@ -9,7 +9,7 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/provider/auth"
 )
 
-func RegisterApis(app *provider.Application) {
+func registerApis(app *provider.Application) {
 	tenant_repo := provider.Make[dependencies.TENANT_REPO](app)
 	product_repo := provider.Make[dependencies.PRODUCT_REPO](app)
 	event_service := provider.Make[dependencies.EVENT_SERVICE](app)
