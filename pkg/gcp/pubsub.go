@@ -23,7 +23,7 @@ type PubSub struct {
 
 func NewPubSub(app *provider.Application, subscription_id string) *PubSub {
 	ctx := context.Background()
-	creds, err := google.FindDefaultCredentials(ctx)
+	creds, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/pubsub")
 	if err != nil {
 		log.Fatal("Tidak bisa memproses credential google", err)
 	}
