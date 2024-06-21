@@ -45,6 +45,7 @@ ENV PORT 8000
 ENV TF_EXECUTABLE "/usr/local/bin/terraform"
 ENV TF_WORKDIR = "/root/terraform/"
 ENV MODULE_NAME = "tenant_management"
+ENV GOOGLE_CREDS_PATH = "/creds.json"
 
 # Command to run the application
 CMD ["/tenant-management-api"]
