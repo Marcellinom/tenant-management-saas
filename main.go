@@ -15,6 +15,9 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("tidak ada .env file yang terdeteksi", err)
 	}
+	if os.Getenv("APP_DEBUG") == "true" {
+		fmt.Println(os.Getenv("GOOGLE_CREDS_PATH"))
+	}
 	startApp()
 }
 
