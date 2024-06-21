@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/auth"
@@ -12,7 +13,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Panic("Error loading .env file", err)
+		fmt.Println("tidak ada .env file yang terdeteksi", err)
 	}
 	startApp()
 }

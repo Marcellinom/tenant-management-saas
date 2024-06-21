@@ -35,7 +35,7 @@ func DefaultEngineConfig() WebEngineConfig {
 	return WebEngineConfig{
 		DebugMode:    os.Getenv("APP_DEBUG") == "true",
 		Environtment: os.Getenv("APP_ENV"),
-		Port:         os.Getenv("APP_PORT"),
+		Port:         os.Getenv("PORT"),
 	}
 }
 
