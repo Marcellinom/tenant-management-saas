@@ -1,9 +1,12 @@
 package queries
 
-import (
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
-)
-
 type TenantQueryInterface interface {
-	GetTenantsByOrganization(organization_id string) (Tenant.Tenant, error)
+	GetByOrganizationId(organization_id string) ([]TenantQueryResult, error)
+}
+
+type TenantQueryResult struct {
+	TenantId            string         `json:"tenant_id"`
+	Name                string         `json:"name"`
+	Status              string         `json:"status"`
+	ResourceInformation map[string]any `json:"resource_information"`
 }

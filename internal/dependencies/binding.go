@@ -15,6 +15,7 @@ type PRODUCT_REPO = *postgres.ProductRepository
 type TENANT_REPO = *postgres.TenantRepository
 type EVENT_SERVICE = *gcp.PubSub
 type ORGANIZATION_QUERY = *iam.OrganizationQuery
+type TENANT_QUERY = *postgres.TenantQuery
 type DEPLOYER_SERVICE = *services.TerraformService
 
 func RegisterBindings(app *provider.Application) {
@@ -31,4 +32,5 @@ func RegisterBindings(app *provider.Application) {
 	provider.Bind[EVENT_SERVICE](app, event_service)
 	provider.Bind[DEPLOYER_SERVICE](app, services.NewTerraformService(event_service, infra_repo))
 	provider.Bind[ORGANIZATION_QUERY](app, iam.NewOrganizationQuery(iam_db))
+	provider.Bind[TENANT_QUERY](app, postgres.NewTenantQuery(app.DefaultDatabase()))
 }
