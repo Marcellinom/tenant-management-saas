@@ -77,6 +77,11 @@ func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tena
 		tfexec.Var(fmt.Sprintf("infrastructure_id=%s", infra_to_use.InfrastructureId.String())),
 		tfexec.Var(fmt.Sprintf("provider_id=%s", os.Getenv("GOOGLE_PROJECT_ID"))),
 	)
+	if os.Getenv("GOOGLE_CREDS_PATH") != "" {
+		tf.Tf_tenant.TenantEnv = append(tf.Tf_tenant.TenantEnv,
+			tfexec.Var(fmt.Sprintf("credentials=%s", os.Getenv("GOOGLE_CREDS_PATH"))),
+		)
+	}
 	tf.UseBackend(gcp.Backend(os.Getenv("GOOGLE_BUCKET"), infra_to_use.Prefix))
 
 	// di bawah ini konteksnya adalah ketika belum ada deployment tenant yang up
