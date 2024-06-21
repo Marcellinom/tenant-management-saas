@@ -31,7 +31,7 @@ func registerApis(app *provider.Application) {
 		"https://api-iam.34d.me",
 	))
 
-	r := app.Engine().Group("/api")
+	r := app.Engine()
 	r.Use(auth.IsAuthenticated)
 
 	o := r.Group("/organization")
