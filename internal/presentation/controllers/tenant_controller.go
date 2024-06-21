@@ -19,7 +19,7 @@ func NewTenantController(create_tenant_cm *commands.CreateTenantCommand, change_
 }
 
 func (c TenantController) GetByOrganization(ctx *gin.Context) {
-	orgs_id := ctx.Query("organization")
+	orgs_id := ctx.Query("organization_id")
 	if orgs_id == "" {
 		ctx.AbortWithError(http.StatusBadRequest, errors.BadRequest(6000, "organization id tidak boleh kosong"))
 		return
