@@ -71,7 +71,7 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	if err != nil {
 		return fmt.Errorf("gagal mengambil data tenant: %w", err)
 	}
-	if tenant.TenantStatus != Tenant.TENANT_TIER_CHANGING {
+	if tenant.TenantStatus != Tenant.TENANT_MIGRATING {
 		return fmt.Errorf("tenant tidak sedang dalam masa perubahan tier")
 	}
 	target_product, err := r.constructProductInfo(payload)

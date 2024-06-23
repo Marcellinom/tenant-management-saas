@@ -7,6 +7,5 @@ import (
 
 type TenantRepositoryInterface interface {
 	Find(tenant_id vo.TenantId) (*Tenant.Tenant, error)
-	Insert(tenant *Tenant.Tenant) error
 	Persist(tenant *Tenant.Tenant) error
 }

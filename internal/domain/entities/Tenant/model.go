@@ -39,7 +39,7 @@ func (t *Tenant) ChangeTier(new_product_id vo.ProductId) error {
 		return fmt.Errorf("status tenant tidak aktif")
 	}
 	t.ProductId = new_product_id
-	t.TenantStatus = TENANT_TIER_CHANGING
+	t.TenantStatus = TENANT_MIGRATING
 	t.events = append(t.events, events.NewTenantTierChanged(t.TenantId.String(), new_product_id.String()))
 	return nil
 }
