@@ -66,7 +66,7 @@ func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tena
 			if err != nil {
 				return fmt.Errorf("gagal melakukan migrasi tenant %w", err)
 			}
-			return s.delegateTenantToNewInfrastructure(infra_to_use, tenant)
+			return s.postMigration(infra_to_use, tenant)
 		}
 		infra_to_use = Infrastructure.CreatePoolConfig(target_product.ProductId)
 	case terraform.SILO:
@@ -91,16 +91,10 @@ func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tena
 		return fmt.Errorf("kegagalan dalam melakukan deployment tenant: %w", err)
 	}
 
-	new_metadata, err = tf.GetMetaData(ctx)
+	new_metadata, err = tf.GetMetadata(ctx)
 	if err != nil {
 		return fmt.Errorf("kegagalan dalam mengambil metadata deployment")
 	}
-
-	var m struct {
-		ServingUrl string `json:"serving_url,omitempty"`
-	}
-	json.Unmarshal(new_metadata, &m)
-	infra_to_use.ServingUrl = m.ServingUrl
 
 	infra_to_use.Metadata = new_metadata
 	err = tf.Migrate(ctx, old_infrastructure.Metadata, infra_to_use.Metadata)
@@ -108,17 +102,7 @@ func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tena
 		return fmt.Errorf("gagal melakukan migrasi tenant %w", err)
 	}
 
-	s.registerNewDomain(tenant, target_product, infra_to_use)
-	return s.delegateTenantToNewInfrastructure(infra_to_use, tenant)
-}
-
-func (s TerraformService) registerNewDomain(tenant *Tenant.Tenant, target_product *Product.Product, new_infra *Infrastructure.Infrastructure) {
-	s.event_service.Dispatch(events.NEW_DOMAIN_REGISTERED, events.NewDomainRegistered(
-		target_product.AppId.Value(),
-		tenant.TenantId.String(),
-		tenant.OrganizationId.String(),
-		new_infra.ServingUrl,
-	))
+	return s.postMigration(infra_to_use, tenant)
 }
 
 func (s TerraformService) constructTfProductConfig(product *Product.Product) (*terraform_product.ProductConfig, error) {
@@ -148,12 +132,12 @@ func (s TerraformService) CleanUpOldInfrastructure(infra *Infrastructure.Infrast
 	}
 }
 
-func (s TerraformService) delegateTenantToNewInfrastructure(infra *Infrastructure.Infrastructure, tenant *Tenant.Tenant) error {
+func (s TerraformService) postMigration(infra *Infrastructure.Infrastructure, tenant *Tenant.Tenant) error {
 	if err := s.infra_repo.Persist(infra); err != nil {
 		return fmt.Errorf("gagal dalam melakukan persistansi data infrastruktur %s : %w", infra.InfrastructureId.String(), err)
 	}
-	s.event_service.Dispatch(events.TENANT_DELEGATED_TO_NEW_INFRASTRUCTURE, events.NewTenantDelegatedToNewInfrastructure(
-		tenant.TenantId.String(), infra.InfrastructureId.String(),
+	s.event_service.Dispatch(events.TENANT_MIGRATED, events.NewTenantDelegatedToNewInfrastructure(
+		tenant.TenantId.String(), infra.InfrastructureId.String(), infra.Metadata,
 	))
 	return nil
 }

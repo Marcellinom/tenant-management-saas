@@ -8,14 +8,16 @@ import (
 type TenantDelegatedToNewInfrastructure struct {
 	TenantId             string    `json:"tenant_id"`
 	NewInfrastructure_id string    `json:"new_infrastructure_id"`
+	MetaData             []byte    `json:"metadata"`
 	Timestamp            time.Time `json:"timestamp"`
 }
 
-func NewTenantDelegatedToNewInfrastructure(tenant_id, new_infrastructure_id string) TenantDelegatedToNewInfrastructure {
+func NewTenantDelegatedToNewInfrastructure(tenant_id, new_infrastructure_id string, infra_metadata []byte) TenantDelegatedToNewInfrastructure {
 	return TenantDelegatedToNewInfrastructure{
 		Timestamp:            time.Now(),
 		TenantId:             tenant_id,
 		NewInfrastructure_id: new_infrastructure_id,
+		MetaData:             infra_metadata,
 	}
 }
 

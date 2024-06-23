@@ -2,10 +2,11 @@ package terraform
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/hashicorp/terraform-exec/tfexec"
 )
 
-func (t *TfExecutable) GetMetaData(ctx context.Context) ([]byte, error) {
+func (t *TfExecutable) GetMetadata(ctx context.Context) ([]byte, error) {
 	var err error
 	if !t.initialized {
 		if err = t.initTerraform(ctx); err != nil {
@@ -22,5 +23,11 @@ func (t *TfExecutable) GetMetaData(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return output["metadata"].Value, nil
+	// reformat output biar langsung dapetin value nya
+	res := make(map[string]json.RawMessage)
+	for i, v := range output {
+		res[i] = v.Value
+	}
+
+	return json.Marshal(res)
 }

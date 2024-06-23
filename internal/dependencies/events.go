@@ -25,7 +25,7 @@ func RegisterEvents(app *provider.Application) {
 			Listener: listeners.NewLogTenantEvent(tenant_repo),
 		},
 	})
-	event_service.RegisterListeners(events.TENANT_DELEGATED_TO_NEW_INFRASTRUCTURE, []event.Handler{
+	event_service.RegisterListeners(events.TENANT_MIGRATED, []event.Handler{
 		{
 			Timeout:  5 * time.Minute,
 			Listener: listeners.NewTenantDelegationToInfrastructure(tenant_repo, infra_repo),
