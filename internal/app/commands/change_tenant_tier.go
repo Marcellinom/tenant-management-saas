@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
@@ -67,6 +66,5 @@ func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTi
 		return errors.Invariant(2003, "kesalahan dalam menyimpan data tenant", err.Error())
 	}
 
-	c.event_service.Dispatch(events.TENANT_TIER_CHANGED, events.NewTenantTierChanged(tenant.TenantId.String(), product_id.String()))
 	return nil
 }

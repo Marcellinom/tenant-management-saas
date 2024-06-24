@@ -42,7 +42,6 @@ func (t *Tenant) ChangeTier(new_product_id vo.ProductId) error {
 	}
 	t.ProductId = new_product_id
 	t.TenantStatus = TENANT_MIGRATING
-	t.events = append(t.events, events.NewTenantTierChanged(t.TenantId.String(), new_product_id.String()))
 	return nil
 }
 

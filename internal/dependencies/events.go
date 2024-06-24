@@ -16,13 +16,25 @@ func RegisterEvents(app *provider.Application) {
 	deployer_service := provider.Make[DEPLOYER_SERVICE](app)
 	event_service := provider.Make[EVENT_SERVICE](app)
 	// akan melakukan migrasi tenant
-	event_service.RegisterListeners(events.TENANT_TIER_CHANGED, []event.Handler{
+	event_service.RegisterListeners(events.BILLING_PAID, []event.Handler{
 		{
 			Timeout:  15 * time.Minute,
 			Listener: listeners.NewTenantTierChangedListener(product_repo, infra_repo, tenant_repo, deployer_service),
 		},
 		{
-			Listener: listeners.NewLogTenantEvent(tenant_repo),
+			Listener: listeners.NewActivatingTenang(tenant_repo),
+		},
+		{
+			Listener: listeners.LogTenantEvent(tenant_repo),
+		},
+	})
+	// akan mengubah resource_information tenant dan membuat tenant aktif kembali
+	event_service.RegisterListeners(events.TENANT_REGISTERED, []event.Handler{
+		{
+			Listener: listeners.NewRegisteringTenantResource(tenant_repo),
+		},
+		{
+			Listener: listeners.LogTenantEvent(tenant_repo),
 		},
 	})
 	// akan mengubah infrastructure id yang dipakai tenant
@@ -32,7 +44,7 @@ func RegisterEvents(app *provider.Application) {
 			Listener: listeners.NewTenantDelegationToInfrastructure(tenant_repo, infra_repo),
 		},
 		{
-			Listener: listeners.NewLogTenantEvent(tenant_repo),
+			Listener: listeners.LogTenantEvent(tenant_repo),
 		},
 	})
 	// akan melakukan destroy resource melalui terraform
@@ -40,15 +52,6 @@ func RegisterEvents(app *provider.Application) {
 		{
 			Timeout:  15 * time.Minute,
 			Listener: listeners.NewDestroyingInfrastructureListener(infra_repo),
-		},
-	})
-	// akan mengubah resource_information tenant dan membuat tenant aktif kembali
-	event_service.RegisterListeners(events.TENANT_REGISTERED, []event.Handler{
-		{
-			Listener: listeners.NewRegisteringTenantResource(tenant_repo),
-		},
-		{
-			Listener: listeners.NewLogTenantEvent(tenant_repo),
 		},
 	})
 }

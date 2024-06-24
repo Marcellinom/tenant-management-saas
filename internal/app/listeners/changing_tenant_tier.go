@@ -43,16 +43,8 @@ func (r TenantTierChangedListener) MaxRetries() int {
 }
 
 func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event) error {
-	//select {
-	//case <-time.After(5 * time.Second):
-	//	fmt.Println("event success", ctx, time.Now())
-	//	log.Print(ctx.Deadline())
-	//	return nil
-	//case <-ctx.Done():
-	//	return ctx.Err()
-	//}
 
-	var payload events.TenantTierChanged
+	var payload events.BillingPaid
 	json_data, err := event.JSON()
 	if err != nil {
 		return fmt.Errorf("gagal menencode json pada event listener: %w", err)
@@ -71,28 +63,32 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	if err != nil {
 		return fmt.Errorf("gagal mengambil data tenant: %w", err)
 	}
+	// bila statusnya deactivate berarti tenantnya bayar buat ngaktifin tenant
+	// bukan buat migrate, makanya bisa skip proses listener ini
+	if tenant.TenantStatus == Tenant.TENANT_DEACTIVATED {
+		return nil
+	}
 	if tenant.TenantStatus != Tenant.TENANT_MIGRATING {
 		return fmt.Errorf("tenant tidak sedang dalam masa perubahan tier")
 	}
-	target_product, err := r.constructProductInfo(payload)
+	target_product, err := r.constructProductInfo(tenant)
 	if err != nil {
-		fmt.Errorf("gagal mendecode target product: %w", err)
+		return fmt.Errorf("gagal mendecode target product: %w", err)
 	}
 	return r.deployer_service.MigrateTenantToTargetProduct(ctx, tenant, target_product)
 }
 
-func (r TenantTierChangedListener) constructProductInfo(payload events.TenantTierChanged) (*Product.Product, error) {
+func (r TenantTierChangedListener) constructProductInfo(tenant *Tenant.Tenant) (*Product.Product, error) {
 	var e = func(er error) (*Product.Product, error) {
 		return nil, er
 	}
 
-	product_id, err := vo.NewProductId(payload.NewProductId)
+	target_product, err := r.product_repo.Find(tenant.ProductId)
 	if err != nil {
 		return e(err)
 	}
-	target_product, err := r.product_repo.Find(product_id)
-	if err != nil {
-		return e(err)
+	if target_product == nil {
+		return nil, fmt.Errorf("target product %s tidak ditemukan", tenant.ProductId.String())
 	}
 	return target_product, nil
 }
