@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/Marcellinom/tenant-management-saas/pkg/terraform"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -21,10 +20,10 @@ func RegisterRoutes(app *provider.Application) {
 	//	ctx.HTML(http.StatusOK, "index.html", map[string]any{"iam_url": iam_url})
 	//})
 	route.GET("/healthcheck", func(context *gin.Context) {
-		if err := terraform.HealthCheck(); err != nil {
-			context.Error(err)
-			return
-		}
+		//if err := terraform.HealthCheck(); err != nil {
+		//	context.Error(err)
+		//	return
+		//}
 		context.JSON(http.StatusOK, map[string]string{
 			"status": "healthy",
 		})
