@@ -28,7 +28,7 @@ func (t TenantRepository) Find(tenant_id vo.TenantId) (*Tenant.Tenant, error) {
 		InfrastructureId    string
 		Name                string
 		Status              string
-		ResourceInformation string
+		ResourceInformation []byte
 	}
 	err := t.db.Table("tenants").Where("id", tenant_id.String()).
 		Take(&tenant_data).Error
@@ -45,12 +45,13 @@ func (t TenantRepository) Find(tenant_id vo.TenantId) (*Tenant.Tenant, error) {
 	infrastructureId, _ := vo.NewInfrastructureId(tenant_data.InfrastructureId)
 
 	return &Tenant.Tenant{
-		TenantId:         id,
-		ProductId:        productId,
-		OrganizationId:   organizationId,
-		TenantStatus:     Tenant.NewTenantStatus(Tenant.Status(tenant_data.Status)),
-		Name:             tenant_data.Name,
-		InfrastructureId: infrastructureId,
+		TenantId:            id,
+		ProductId:           productId,
+		OrganizationId:      organizationId,
+		TenantStatus:        Tenant.NewTenantStatus(Tenant.Status(tenant_data.Status)),
+		Name:                tenant_data.Name,
+		InfrastructureId:    infrastructureId,
+		ResourceInformation: tenant_data.ResourceInformation,
 	}, nil
 }
 
@@ -63,11 +64,12 @@ func (t TenantRepository) Persist(tenant *Tenant.Tenant) error {
 			return err
 		}
 		payload := map[string]any{
-			"product_id":        tenant.ProductId.String(),
-			"name":              tenant.Name,
-			"status":            tenant.TenantStatus,
-			"updated_at":        time.Now(),
-			"infrastructure_id": tenant.InfrastructureId.String(),
+			"product_id":           tenant.ProductId.String(),
+			"name":                 tenant.Name,
+			"status":               tenant.TenantStatus,
+			"updated_at":           time.Now(),
+			"infrastructure_id":    tenant.InfrastructureId.String(),
+			"resource_information": tenant.ResourceInformation,
 		}
 
 		if row > 0 {

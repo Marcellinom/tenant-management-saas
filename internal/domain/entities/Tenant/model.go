@@ -16,6 +16,8 @@ type Tenant struct {
 	TenantStatus     Status              `json:"tenant_status"`
 	Name             string              `json:"name"`
 
+	ResourceInformation []byte `json:"resource_information"`
+
 	events []event.Event
 }
 
@@ -44,12 +46,20 @@ func (t *Tenant) ChangeTier(new_product_id vo.ProductId) error {
 	return nil
 }
 
-func (t *Tenant) ActivateWithNewInfrastructure(new_infra *Infrastructure.Infrastructure) error {
-	if t.TenantStatus == TENANT_ACTIVATED {
-		return fmt.Errorf("status tenant masih aktif")
+func (t *Tenant) ActivateWithNewResourceInformation(resource_info []byte) error {
+	if t.TenantStatus != TENANT_MIGRATING {
+		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
+	}
+	t.ResourceInformation = resource_info
+	t.TenantStatus = TENANT_ACTIVATED
+	return nil
+}
+
+func (t *Tenant) DelegateNewInfrastructure(new_infra *Infrastructure.Infrastructure) error {
+	if t.TenantStatus != TENANT_MIGRATING {
+		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
 	}
 	t.InfrastructureId = new_infra.InfrastructureId
-	t.TenantStatus = TENANT_ACTIVATED
 	t.events = append(t.events, events.NewTenantInfrastructureChanged(t.TenantId.String(), new_infra.InfrastructureId.String()))
 	return nil
 }

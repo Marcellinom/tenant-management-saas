@@ -62,7 +62,7 @@ func (t TenantDelegationToInfrastructure) Handle(ctx context.Context, event even
 		return fmt.Errorf("data infrastruktur yang akan dipakai tenant tidak ditemukan")
 	}
 
-	if err = tenant.ActivateWithNewInfrastructure(infrastructure); err != nil {
+	if err = tenant.DelegateNewInfrastructure(infrastructure); err != nil {
 		return err
 	}
 	if err = t.tenant_repo.Persist(tenant); err != nil {

@@ -1,6 +1,7 @@
 package vo
 
 import (
+	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
 	"github.com/google/uuid"
 )
@@ -22,9 +23,9 @@ func newUuid[T ~struct{ useUuid }](str string, customError ...errors.InvariantEr
 	_, err := uuid.Parse(str)
 	if err != nil {
 		if len(customError) > 0 {
-			return T{}, customError[0]
+			return T{}, fmt.Errorf("%w but got %s instead", customError[0], str)
 		} else {
-			return T{}, err
+			return T{}, fmt.Errorf("%w but got %s instead", err, str)
 		}
 	}
 	return T{useUuid{str}}, nil
