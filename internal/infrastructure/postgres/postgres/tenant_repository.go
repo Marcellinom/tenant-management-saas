@@ -69,23 +69,27 @@ func (t TenantRepository) Persist(tenant *Tenant.Tenant) error {
 			"updated_at":        time.Now(),
 			"infrastructure_id": tenant.InfrastructureId.String(),
 		}
-		defer t.event_service.Dispatch(events.TENANT_PERSISTED, events.NewTenantPersisted(
-			tenant.TenantId.String(),
-			tenant.ProductId.String(),
-			tenant.OrganizationId.String(),
-			tenant.InfrastructureId.String(),
-			tenant.Name,
-			tenant.TenantStatus,
-		))
+
 		if row > 0 {
-			return tx.Table("tenants").
+			err = tx.Table("tenants").
 				Where("id", tenant.TenantId.String()).
 				Updates(payload).Error
 		} else {
 			payload["id"] = tenant.TenantId.String()
 			payload["organization_id"] = tenant.OrganizationId.String()
 			payload["created_at"] = time.Now()
-			return tx.Table("tenants").Create(payload).Error
+			err = tx.Table("tenants").Create(payload).Error
 		}
+		if err == nil {
+			t.event_service.Dispatch(events.TENANT_PERSISTED, events.NewTenantPersisted(
+				tenant.TenantId.String(),
+				tenant.ProductId.String(),
+				tenant.OrganizationId.String(),
+				tenant.InfrastructureId.String(),
+				tenant.Name,
+				tenant.TenantStatus,
+			))
+		}
+		return err
 	})
 }
