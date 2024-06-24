@@ -9,4 +9,8 @@ type TenantQueryResult struct {
 	Name                string         `json:"name"`
 	Status              string         `json:"status"`
 	ResourceInformation map[string]any `json:"resource_information"`
+	ProductId           string         `json:"product_id"`
+	Tier                string         `json:"tier"`
+	AppId               int            `json:"app_id"`
+	AppName             string         `json:"app_name"`
 }

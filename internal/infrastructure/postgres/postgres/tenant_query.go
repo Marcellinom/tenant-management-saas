@@ -20,10 +20,23 @@ func (t TenantQuery) GetByOrganizationId(orgs_id string) ([]queries.TenantQueryR
 		Name                string
 		Status              string
 		ResourceInformation []byte
+		ProductId           string
+		Tier                string
+		AppId               int
+		AppName             string
 	}
-	err := t.db.Table("tenants").
-		Where("organization_id", orgs_id).
-		Where("deleted_at is null").Find(&res).Error
+	err := t.db.Raw(
+		"select "+
+			"t.id,"+
+			"name,"+
+			"status,"+
+			"resource_information,"+
+			"p.id as product_id,"+
+			"p.tier_name as tier,"+
+			"p.app_id,"+
+			"(select name from apps a where a.id = p.app_id) app_name "+
+			"from (select id, name, status, resource_information, product_id from tenants where organization_id = ? and deleted_at is null"+
+			") t join products p on t.product_id = p.id", orgs_id).Find(&res).Error
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +51,10 @@ func (t TenantQuery) GetByOrganizationId(orgs_id string) ([]queries.TenantQueryR
 			Name:                v.Name,
 			Status:              v.Status,
 			ResourceInformation: resource,
+			ProductId:           v.ProductId,
+			Tier:                v.Tier,
+			AppId:               v.AppId,
+			AppName:             v.AppName,
 		}
 	}
 	return query_res, nil
