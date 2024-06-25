@@ -11,7 +11,6 @@ import (
 // the user has already been authenticated previously.
 func IsAuthenticated(ctx *gin.Context) {
 	authorizationHeader := ctx.Request.Header.Get("Authorization")
-
 	if authorizationHeader == "" || len("Bearer ") >= len(authorizationHeader) {
 		ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("unauthorized"))
 		return

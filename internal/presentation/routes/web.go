@@ -19,7 +19,7 @@ func RegisterRoutes(app *provider.Application) {
 	//	iam_url := app.Auth().GetProvider() + "/login"
 	//	ctx.HTML(http.StatusOK, "index.html", map[string]any{"iam_url": iam_url})
 	//})
-	route.GET("/healthcheck", func(context *gin.Context) {
+	route.GET("/", func(context *gin.Context) {
 		//if err := terraform.HealthCheck(); err != nil {
 		//	context.Error(err)
 		//	return

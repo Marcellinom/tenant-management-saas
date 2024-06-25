@@ -25,10 +25,10 @@ func registerApis(app *provider.Application) {
 	organization_controller := controllers.NewOrganizationController(organization_query)
 
 	app.Engine().Use(auth.CORSMiddleware(
-		"http://localhost:3000",
-		"https://api-onboarding.34d.me",
-		"https://onboarding.34d.me",
-		"https://api-iam.34d.me",
+	//"http://localhost:3000",
+	//"https://api-onboarding.34d.me",
+	//"https://onboarding.34d.me",
+	//"https://api-iam.34d.me",
 	))
 
 	r := app.Engine()

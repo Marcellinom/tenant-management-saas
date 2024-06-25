@@ -93,9 +93,8 @@ func (e DefaultErrorHandler) Handle(debugMode bool) func(ctx *provider.Context) 
 			ctx.JSON(
 				http.StatusInternalServerError,
 				H{
-					"code":    http.StatusInternalServerError,
-					"message": "internal_server_error",
-					"data":    data,
+					"code": http.StatusInternalServerError,
+					"data": data,
 				},
 			)
 		}

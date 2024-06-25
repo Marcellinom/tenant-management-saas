@@ -55,6 +55,7 @@ func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tena
 
 	var infra_to_use *Infrastructure.Infrastructure
 	var new_metadata []byte
+
 	switch target_product.DeploymentType {
 	case terraform.POOL:
 		infra_to_use, err = s.infra_repo.FindAvailablePoolForProduct(target_product.ProductId)
