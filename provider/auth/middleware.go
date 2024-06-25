@@ -34,6 +34,7 @@ func CORSMiddleware(allowed_origins ...string) gin.HandlerFunc {
 		origins = "*"
 	}
 	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		origin := c.Request.Header.Get("Origin")
 		if len(origins) > 0 {
 			for _, v := range allowed_origins {
@@ -41,8 +42,6 @@ func CORSMiddleware(allowed_origins ...string) gin.HandlerFunc {
 					c.Writer.Header().Set("Access-Control-Allow-Origin", origins)
 				}
 			}
-		} else {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		}
 		c.Writer.Header().Set("Content-Type", "application/json")
 		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
