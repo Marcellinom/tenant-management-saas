@@ -47,11 +47,11 @@ func RegisterEvents(app *provider.Application) {
 			Listener: listeners.LogTenantEvent(tenant_repo),
 		},
 	})
-	// akan melakukan destroy resource melalui terraform
-	event_service.RegisterListeners(events.INFRASTRUCTURE_DESTROYED, []event.Handler{
-		{
-			Timeout:  15 * time.Minute,
-			Listener: listeners.NewDestroyingInfrastructureListener(infra_repo),
-		},
-	})
+	// akan melakukan destroy resource di provider
+	//event_service.RegisterListeners(events.INFRASTRUCTURE_DESTROYED, []event.Handler{
+	//	{
+	//		Timeout:  15 * time.Minute,
+	//		Listener: listeners.NewDestroyingInfrastructureListener(infra_repo),
+	//	},
+	//})
 }
