@@ -19,12 +19,27 @@ func NewTenantController(create_tenant_cm *commands.CreateTenantCommand, change_
 }
 
 func (c TenantController) GetByOrganization(ctx *gin.Context) {
-	orgs_id := ctx.Query("organization_id")
+	orgs_id := ctx.Param("organization_id")
 	if orgs_id == "" {
 		ctx.AbortWithError(http.StatusBadRequest, errors.BadRequest(6000, "organization id tidak boleh kosong"))
 		return
 	}
 	res, err := c.tenant_query_interface.GetByOrganizationId(orgs_id)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	SuccessWithData(ctx, res)
+}
+
+func (c TenantController) FindByTenantId(ctx *gin.Context) {
+	orgs_id := ctx.Param("organization_id")
+	tenant_id := ctx.Param("tenant_id")
+	if orgs_id == "" || tenant_id == "" {
+		ctx.AbortWithError(http.StatusBadRequest, errors.BadRequest(6001, "organization id dan tenant id tidak boleh kosong"))
+		return
+	}
+	res, err := c.tenant_query_interface.Find(orgs_id, tenant_id)
 	if err != nil {
 		ctx.Error(err)
 		return

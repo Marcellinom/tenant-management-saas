@@ -42,7 +42,9 @@ func registerApis(app *provider.Application) {
 
 	t := r.Group("/tenant")
 	{
-		t.GET("", tenant_controller.GetByOrganization)
+		t.GET("/:organization_id", tenant_controller.GetByOrganization)
+		t.GET("/:organization_id/:tenant_id", tenant_controller.FindByTenantId)
+
 		t.POST("", tenant_controller.CreateTenant)
 		t.POST("/change_tier", tenant_controller.ChangeTenantTier)
 	}

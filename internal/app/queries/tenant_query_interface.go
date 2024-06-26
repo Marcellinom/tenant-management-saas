@@ -2,6 +2,7 @@ package queries
 
 type TenantQueryInterface interface {
 	GetByOrganizationId(organization_id string) ([]TenantQueryResult, error)
+	Find(organization_id, tenant_id string) (*TenantQueryResult, error)
 }
 
 type TenantQueryResult struct {

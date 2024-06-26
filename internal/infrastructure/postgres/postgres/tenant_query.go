@@ -2,8 +2,10 @@ package postgres
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/Marcellinom/tenant-management-saas/internal/app/queries"
 	"github.com/Marcellinom/tenant-management-saas/provider"
+	"gorm.io/gorm"
 )
 
 type TenantQuery struct {
@@ -14,17 +16,19 @@ func NewTenantQuery(db *provider.Database) *TenantQuery {
 	return &TenantQuery{db: db}
 }
 
+type tenantQueryDto struct {
+	Id                  string
+	Name                string
+	Status              string
+	ResourceInformation []byte
+	ProductId           string
+	Tier                string
+	AppId               int
+	AppName             string
+}
+
 func (t TenantQuery) GetByOrganizationId(orgs_id string) ([]queries.TenantQueryResult, error) {
-	var res []struct {
-		Id                  string
-		Name                string
-		Status              string
-		ResourceInformation []byte
-		ProductId           string
-		Tier                string
-		AppId               int
-		AppName             string
-	}
+	var res []tenantQueryDto
 	err := t.db.Raw(
 		"select "+
 			"t.id,"+
@@ -58,4 +62,40 @@ func (t TenantQuery) GetByOrganizationId(orgs_id string) ([]queries.TenantQueryR
 		}
 	}
 	return query_res, nil
+}
+
+func (t TenantQuery) Find(organization_id, tenant_id string) (*queries.TenantQueryResult, error) {
+	var res tenantQueryDto
+	err := t.db.Raw(
+		"select "+
+			"t.id,"+
+			"name,"+
+			"status,"+
+			"resource_information,"+
+			"p.id as product_id,"+
+			"p.tier_name as tier,"+
+			"p.app_id,"+
+			"(select name from apps a where a.id = p.app_id) app_name "+
+			"from (select id, name, status, resource_information, product_id from tenants where organization_id = ? and id = ? and deleted_at is null"+
+			") t join products p on t.product_id = p.id", organization_id, tenant_id).
+		Take(&res).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+	}
+	var resource map[string]any
+	if res.ResourceInformation != nil {
+		json.Unmarshal(res.ResourceInformation, &resource)
+	}
+	return &queries.TenantQueryResult{
+		TenantId:            res.Id,
+		Name:                res.Name,
+		Status:              res.Status,
+		ResourceInformation: resource,
+		ProductId:           res.ProductId,
+		Tier:                res.Tier,
+		AppId:               res.AppId,
+		AppName:             res.AppName,
+	}, nil
 }
