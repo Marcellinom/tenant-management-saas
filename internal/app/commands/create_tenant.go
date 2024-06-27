@@ -21,7 +21,15 @@ type CreateTenantRequest struct {
 	Name            string `json:"name"`
 }
 
-func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*Tenant.Tenant, error) {
+type CreateTenantResponse struct {
+	TenantId       string `json:"tenant_id"`
+	ProductId      string `json:"product_id"`
+	OrganizationId string `json:"organization_id"`
+	TenantStatus   string `json:"tenant_status"`
+	Name           string `json:"name"`
+}
+
+func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*CreateTenantResponse, error) {
 	product_id, err := vo.NewProductId(req.Product_id)
 	if err != nil {
 		return nil, errors.BadRequest(1000, "invalid product id")
@@ -37,5 +45,11 @@ func (c CreateTenantCommand) Execute(req CreateTenantRequest) (*Tenant.Tenant, e
 		return nil, err
 	}
 
-	return new_tenant, nil
+	return &CreateTenantResponse{
+		TenantId:       new_tenant.TenantId.String(),
+		ProductId:      new_tenant.ProductId.String(),
+		OrganizationId: new_tenant.OrganizationId.String(),
+		TenantStatus:   new_tenant.TenantStatus,
+		Name:           new_tenant.Name,
+	}, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type useUuid struct {
-	value string
+	value string `json:"id"`
 }
 
 func (t useUuid) String() string {

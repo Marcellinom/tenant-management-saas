@@ -28,7 +28,7 @@ func RegisterBindings(app *provider.Application) {
 
 	provider.Bind[INFRA_REPO](app, infra_repo)
 	provider.Bind[PRODUCT_REPO](app, postgres.NewProductRepository(app.DefaultDatabase()))
-	provider.Bind[TENANT_REPO](app, postgres.NewTenantRepository(app.DefaultDatabase()))
+	provider.Bind[TENANT_REPO](app, postgres.NewTenantRepository(app.DefaultDatabase(), event_service))
 	provider.Bind[EVENT_SERVICE](app, event_service)
 	provider.Bind[DEPLOYER_SERVICE](app, services.NewTerraformService(event_service, infra_repo))
 	provider.Bind[ORGANIZATION_QUERY](app, iam.NewOrganizationQuery(iam_db))

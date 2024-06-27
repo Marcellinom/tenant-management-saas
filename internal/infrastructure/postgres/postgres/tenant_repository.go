@@ -16,8 +16,8 @@ type TenantRepository struct {
 	event_service event.Service
 }
 
-func NewTenantRepository(db *provider.Database) *TenantRepository {
-	return &TenantRepository{db: db}
+func NewTenantRepository(db *provider.Database, event_service event.Service) *TenantRepository {
+	return &TenantRepository{db: db, event_service: event_service}
 }
 
 func (t TenantRepository) Find(tenant_id vo.TenantId) (*Tenant.Tenant, error) {
@@ -68,11 +68,11 @@ func (t TenantRepository) Persist(tenant *Tenant.Tenant) error {
 			"name":                 tenant.Name,
 			"status":               tenant.TenantStatus,
 			"updated_at":           time.Now(),
-			"infrastructure_id":    tenant.InfrastructureId.String(),
 			"resource_information": tenant.ResourceInformation,
 		}
 
 		if row > 0 {
+			payload["infrastructure_id"] = tenant.InfrastructureId.String()
 			err = tx.Table("tenants").
 				Where("id", tenant.TenantId.String()).
 				Updates(payload).Error
