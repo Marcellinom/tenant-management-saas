@@ -14,10 +14,15 @@ func (t *TfExecutable) Migrate(ctx context.Context, old_infrastructure_metadata,
 	new_infra := fmt.Sprintf("-new=%s", string(new_infrastructure_metadata))
 	tenant_id := fmt.Sprintf("-tenant_id=%s", t.Tf_tenant.TenantId())
 
-	out, err := exec.Command("go", "run", migration_script, old_infra, new_infra, tenant_id).Output()
-	if err != nil {
+	cmd := exec.Command("go", "run", migration_script, old_infra, new_infra, tenant_id)
+	err = cmd.Run()
+	var exit_code int
+	if e, ok := err.(*exec.ExitError); ok {
+		exit_code = e.ProcessState.ExitCode()
+	}
+	if exit_code == 1 {
 		return err
 	}
-	fmt.Println(string(out))
+	fmt.Println("success melakukan migrasi")
 	return nil
 }
