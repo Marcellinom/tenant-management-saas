@@ -29,6 +29,15 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /tenant-management-api
 # Stage 3: Create final runtime image
 FROM alpine:latest
 
+RUN wget https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
+    rm go${GO_VERSION}.linux-amd64.tar.gz
+
+# Set Go environment variables
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/go
+ENV PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+
 WORKDIR /root/
 
 # Copy the Terraform binary from the first stage
