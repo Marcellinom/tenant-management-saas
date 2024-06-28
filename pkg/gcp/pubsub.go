@@ -95,15 +95,15 @@ func (g *PubSub) listen(event_name string) {
 			}()
 
 			select {
-			case err := <-err_chan:
-				fmt.Println(err)
-				if err != nil {
-					event.MarkAsFailed(g.app, event_name, handler.Listener.Name(), err.Error(), message.Data, handler.Listener.MaxRetries())
-				}
 			case <-handler_ctx.Done():
 				if errors.As(handler_ctx.Err(), &context.DeadlineExceeded) {
 					fmt.Println(handler_ctx.Err())
 					event.MarkAsFailed(g.app, event_name, handler.Listener.Name(), handler_ctx.Err().Error(), message.Data, handler.Listener.MaxRetries(), "timeout")
+				}
+			case err := <-err_chan:
+				fmt.Println(err)
+				if err != nil && err.Error() != "context deadline exceeded" {
+					event.MarkAsFailed(g.app, event_name, handler.Listener.Name(), err.Error(), message.Data, handler.Listener.MaxRetries())
 				}
 			}
 			cancel()

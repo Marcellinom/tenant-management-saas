@@ -63,6 +63,9 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	if err != nil {
 		return fmt.Errorf("gagal mengambil data tenant: %w", err)
 	}
+	if tenant == nil {
+		return fmt.Errorf("tenant id %s tidak ditemukan", tenant_id.String())
+	}
 	// bila statusnya deactivate berarti tenantnya bayar buat ngaktifin tenant
 	// bukan buat migrate, makanya bisa skip proses listener ini
 	if tenant.TenantStatus == Tenant.TENANT_DEACTIVATED {
