@@ -20,7 +20,7 @@ func (t *TfExecutable) Migrate(ctx context.Context, old_infrastructure_metadata,
 	if e, ok := err.(*exec.ExitError); ok {
 		exit_code = e.ProcessState.ExitCode()
 	}
-	if exit_code == 1 {
+	if exit_code != 1 {
 		return err
 	}
 	fmt.Println("success melakukan migrasi")
