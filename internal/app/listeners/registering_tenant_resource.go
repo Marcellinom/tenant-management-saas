@@ -2,6 +2,7 @@ package listeners
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
@@ -18,11 +19,16 @@ func NewRegisteringTenantResource(tenant_repo repositories.TenantRepositoryInter
 }
 
 func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event) error {
-	payload, ok := event.(events.TenantResourceRegistered)
-	if !ok {
-		j, _ := event.JSON()
-		return fmt.Errorf("gagal mendecode payload %v menjadi tipe data %T", j, events.TenantResourceRegistered{})
+	var payload events.TenantResourceRegistered
+	json_data, err := event.JSON()
+	if err != nil {
+		return fmt.Errorf("gagal menencode json pada event listener: %w", err)
 	}
+	err = json.Unmarshal(json_data, &payload)
+	if err != nil {
+		return fmt.Errorf("gagal mendecode json pada event listener: %w", err)
+	}
+
 	tenant_id, err := vo.NewTenantId(payload.TenantId)
 	if err != nil {
 		return err
