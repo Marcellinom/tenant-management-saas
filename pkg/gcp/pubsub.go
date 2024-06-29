@@ -87,7 +87,11 @@ func (g *PubSub) listen(event_name string) {
 		}
 		message.Ack()
 		for _, handler := range handlers {
-			handler_ctx, cancel := context.WithTimeout(ctx, handler.Timeout)
+			handler_ctx := ctx
+			var cancel context.CancelFunc
+			if handler.Timeout > 0 {
+				handler_ctx, cancel = context.WithTimeout(ctx, handler.Timeout)
+			}
 
 			err_chan := make(chan error)
 			go func() {
@@ -106,7 +110,9 @@ func (g *PubSub) listen(event_name string) {
 					event.MarkAsFailed(g.app, event_name, handler.Listener.Name(), err.Error(), message.Data, handler.Listener.MaxRetries())
 				}
 			}
-			cancel()
+			if cancel != nil {
+				cancel()
+			}
 		}
 	})
 	if err != nil {
