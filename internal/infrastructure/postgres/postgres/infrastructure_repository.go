@@ -30,12 +30,12 @@ type infra_schema struct {
 
 func (i InfrastructureRepository) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
 	var infra_row infra_schema
-	err := i.db.Raw("select id, product_id, metadata, "+
+	err := i.db.Raw("select * from (select id, product_id, metadata, "+
 		"(select count(infrastructure_id) from tenants t where t.infrastructure_id = i.id and t.status = 'activated') as user_count, "+
 		"user_limit, prefix, deployment_model "+
 		"from infrastructures i "+
 		"where i.product_id = ? and i.deployment_model = 'pool' "+
-		"and deleted_at is null having user_count < user_limit", product_id.String()).
+		"and deleted_at is null) res where user_count < user_limit", product_id.String()).
 		Take(&infra_row).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
