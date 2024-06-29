@@ -34,8 +34,8 @@ func (i InfrastructureRepository) FindAvailablePoolForProduct(product_id vo.Prod
 		"(select count(infrastructure_id) from tenants t where t.infrastructure_id = i.id and t.status = 'activated') as user_count, "+
 		"user_limit, prefix, deployment_model "+
 		"from infrastructures i "+
-		"where i.product_id = ? and i.deployment_model = 'pool' and user_count < user_limit "+
-		"and deleted_at is null", product_id.String()).
+		"where i.product_id = ? and i.deployment_model = 'pool' "+
+		"and deleted_at is null having user_count < user_limit", product_id.String()).
 		Take(&infra_row).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

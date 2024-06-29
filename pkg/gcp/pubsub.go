@@ -101,8 +101,8 @@ func (g *PubSub) listen(event_name string) {
 					event.MarkAsFailed(g.app, event_name, handler.Listener.Name(), handler_ctx.Err().Error(), message.Data, handler.Listener.MaxRetries(), "timeout")
 				}
 			case err := <-err_chan:
-				fmt.Println(err)
 				if err != nil && err.Error() != "context deadline exceeded" {
+					fmt.Println(err)
 					event.MarkAsFailed(g.app, event_name, handler.Listener.Name(), err.Error(), message.Data, handler.Listener.MaxRetries())
 				}
 			}
