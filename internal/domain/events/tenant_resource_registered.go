@@ -7,7 +7,7 @@ import (
 
 type TenantResourceRegistered struct {
 	TenantId            string    `json:"tenant_id"`
-	ResourceInformation []byte    `json:"resource_information"`
+	ResourceInformation any       `json:"resource_information"`
 	Timestamp           time.Time `json:"timestamp"`
 }
 
