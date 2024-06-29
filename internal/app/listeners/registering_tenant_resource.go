@@ -41,7 +41,7 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("data tenant dengan id %s tidak ditemukan", payload.TenantId)
 	}
 
-	err = tenant.ActivateWithNewResourceInformation(payload.ResourceInformation)
+	err = tenant.ActivateWithNewResourceInformation([]byte(payload.ResourceInformation.(string)))
 	if err != nil {
 		return fmt.Errorf("gagal melakukan registrasi resource tenant: %w", err)
 	}
