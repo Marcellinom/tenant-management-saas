@@ -59,9 +59,8 @@ func (t *Tenant) DelegateNewInfrastructure(new_infra *Infrastructure.Infrastruct
 		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
 	}
 	t.InfrastructureId = new_infra.InfrastructureId
-	t.Events[events.TENANT_MIGRATED] = events.NewTenantDelegatedToNewInfrastructure(
+	t.Events[events.TENANT_REGISTERED] = events.NewTenantResourceRegistered(
 		t.TenantId.String(),
-		t.InfrastructureId.String(),
 		new_infra.Metadata,
 	)
 	return nil
