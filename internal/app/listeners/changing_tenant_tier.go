@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Product"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
+	"time"
 )
 
 type TenantTierChangedListener struct {
@@ -44,7 +44,11 @@ func (r TenantTierChangedListener) MaxRetries() int {
 
 func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event) error {
 
-	var payload events.BillingPaid
+	var payload struct {
+		TenantId  string    `json:"tenant_id"`
+		ProductId string    `json:"product_id"`
+		Timestamp time.Time `json:"timestamp"`
+	}
 	json_data, err := event.JSON()
 	if err != nil {
 		return fmt.Errorf("gagal menencode json pada event listener: %w", err)
