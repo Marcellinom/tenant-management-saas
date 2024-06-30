@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Product"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Tenant"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/repositories"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/services"
@@ -78,24 +77,13 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	if tenant.TenantStatus != Tenant.TENANT_MIGRATING {
 		return fmt.Errorf("tenant tidak sedang dalam masa perubahan tier")
 	}
-	target_product, err := r.constructProductInfo(tenant)
+	product_id, err := vo.NewProductId(payload.ProductId)
+	if err != nil {
+		return fmt.Errorf("gagal memparsing uuid product: %w", err)
+	}
+	target_product, err := r.product_repo.Find(product_id)
 	if err != nil {
 		return fmt.Errorf("gagal mendecode target product: %w", err)
 	}
 	return r.deployer_service.MigrateTenantToTargetProduct(ctx, tenant, target_product)
-}
-
-func (r TenantTierChangedListener) constructProductInfo(tenant *Tenant.Tenant) (*Product.Product, error) {
-	var e = func(er error) (*Product.Product, error) {
-		return nil, er
-	}
-
-	target_product, err := r.product_repo.Find(tenant.ProductId)
-	if err != nil {
-		return e(err)
-	}
-	if target_product == nil {
-		return nil, fmt.Errorf("target product %s tidak ditemukan", tenant.ProductId.String())
-	}
-	return target_product, nil
 }
