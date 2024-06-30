@@ -36,11 +36,10 @@ func (t *Tenant) ChangeTier(new_product_id vo.ProductId) error {
 	if t.TenantStatus != TENANT_ACTIVATED {
 		return fmt.Errorf("status tenant tidak aktif")
 	}
-	t.ProductId = new_product_id
 	t.TenantStatus = TENANT_MIGRATING
 	t.Events["tenant_migrating_independently"] = events.NewTenantMigratingIndependently(
 		t.TenantId.String(),
-		t.ProductId.String(),
+		new_product_id.String(),
 	)
 	return nil
 }

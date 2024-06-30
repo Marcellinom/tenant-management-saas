@@ -85,5 +85,10 @@ func (r TenantTierChangedListener) Handle(ctx context.Context, event event.Event
 	if err != nil {
 		return fmt.Errorf("gagal mendecode target product: %w", err)
 	}
-	return r.deployer_service.MigrateTenantToTargetProduct(ctx, tenant, target_product)
+	err = r.deployer_service.MigrateTenantToTargetProduct(ctx, tenant, target_product)
+	if err != nil {
+		return fmt.Errorf("gagal melakukan migrasi: %w", err)
+	}
+	tenant.ProductId = product_id
+	return r.tenant_repo.Persist(tenant)
 }
