@@ -15,6 +15,16 @@ func RegisterEvents(app *provider.Application) {
 
 	deployer_service := provider.Make[DEPLOYER_SERVICE](app)
 	event_service := provider.Make[EVENT_SERVICE](app)
+
+	// akan melakukan migrasi tenant tanpa trigger dari modul billing
+	// dan registrasi tenant resource dari IAM
+	event_service.RegisterListeners("tenant_migrating_independently", []event.Handler{
+		{
+			Timeout:  15 * time.Minute,
+			Listener: listeners.NewTenantTierChangedListener(product_repo, infra_repo, tenant_repo, deployer_service),
+		},
+	})
+
 	// akan melakukan migrasi tenant
 	event_service.RegisterListeners(events.BILLING_PAID, []event.Handler{
 		{

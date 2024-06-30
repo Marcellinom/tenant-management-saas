@@ -3,6 +3,7 @@ package Tenant
 import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Infrastructure"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
@@ -37,6 +38,10 @@ func (t *Tenant) ChangeTier(new_product_id vo.ProductId) error {
 	}
 	t.ProductId = new_product_id
 	t.TenantStatus = TENANT_MIGRATING
+	t.Events["tenant_migrating_independently"] = events.NewTenantMigratingIndependently(
+		t.TenantId.String(),
+		t.ProductId.String(),
+	)
 	return nil
 }
 
@@ -54,5 +59,10 @@ func (t *Tenant) DelegateNewInfrastructure(new_infra *Infrastructure.Infrastruct
 		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
 	}
 	t.InfrastructureId = new_infra.InfrastructureId
+	t.Events[events.TENANT_MIGRATED] = events.NewTenantDelegatedToNewInfrastructure(
+		t.TenantId.String(),
+		t.InfrastructureId.String(),
+		new_infra.Metadata,
+	)
 	return nil
 }
