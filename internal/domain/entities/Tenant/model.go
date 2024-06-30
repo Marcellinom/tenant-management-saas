@@ -3,7 +3,6 @@ package Tenant
 import (
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Infrastructure"
-	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
@@ -18,11 +17,7 @@ type Tenant struct {
 
 	ResourceInformation []byte `json:"resource_information"`
 
-	events []event.Event
-}
-
-func (t *Tenant) Events() []event.Event {
-	return t.events
+	Events map[string]event.Event
 }
 
 func Create(product_id vo.ProductId, organization_id vo.OrganizationId, name string) *Tenant {
@@ -32,7 +27,7 @@ func Create(product_id vo.ProductId, organization_id vo.OrganizationId, name str
 		ProductId:      product_id,
 		OrganizationId: organization_id,
 		Name:           name,
-		events:         make([]event.Event, 0),
+		Events:         make(map[string]event.Event),
 	}
 }
 
@@ -59,6 +54,5 @@ func (t *Tenant) DelegateNewInfrastructure(new_infra *Infrastructure.Infrastruct
 		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
 	}
 	t.InfrastructureId = new_infra.InfrastructureId
-	t.events = append(t.events, events.NewTenantInfrastructureChanged(t.TenantId.String(), new_infra.InfrastructureId.String()))
 	return nil
 }

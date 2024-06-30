@@ -7,6 +7,7 @@ import (
 
 type BillingPaid struct {
 	TenantId  string    `json:"tenant_id"`
+	ProductId string    `json:"product_id"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
