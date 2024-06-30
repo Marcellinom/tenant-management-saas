@@ -11,8 +11,8 @@ type TenantResourceRegistered struct {
 	Timestamp           time.Time `json:"timestamp"`
 }
 
-func NewTenantResourceRegistered(tenantId string, resourceInformation []byte) *TenantResourceRegistered {
-	return &TenantResourceRegistered{
+func NewTenantResourceRegistered(tenantId string, resourceInformation []byte) TenantResourceRegistered {
+	return TenantResourceRegistered{
 		TenantId:            tenantId,
 		ResourceInformation: resourceInformation,
 		Timestamp:           time.Now(),
