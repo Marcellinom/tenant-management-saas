@@ -17,7 +17,6 @@ func RegisterEvents(app *provider.Application) {
 	event_service := provider.Make[EVENT_SERVICE](app)
 
 	// akan melakukan migrasi tenant tanpa trigger dari modul billing
-	// dan registrasi tenant resource dari IAM
 	event_service.RegisterListeners("tenant_migrating_independently", []event.Handler{
 		{
 			Timeout:  15 * time.Minute,
@@ -25,28 +24,6 @@ func RegisterEvents(app *provider.Application) {
 		},
 	})
 
-	// akan melakukan migrasi tenant
-	event_service.RegisterListeners(events.BILLING_PAID, []event.Handler{
-		{
-			Timeout:  15 * time.Minute,
-			Listener: listeners.NewTenantTierChangedListener(product_repo, infra_repo, tenant_repo, deployer_service),
-		},
-		{
-			Listener: listeners.NewActivatingTenang(tenant_repo),
-		},
-		{
-			Listener: listeners.LogTenantEvent(tenant_repo),
-		},
-	})
-	// akan mengubah resource_information tenant dan membuat tenant aktif kembali
-	event_service.RegisterListeners(events.TENANT_REGISTERED, []event.Handler{
-		{
-			Listener: listeners.NewRegisteringTenantResource(tenant_repo),
-		},
-		{
-			Listener: listeners.LogTenantEvent(tenant_repo),
-		},
-	})
 	// akan mengubah infrastructure id yang dipakai tenant
 	event_service.RegisterListeners(events.TENANT_MIGRATED, []event.Handler{
 		{
@@ -57,6 +34,33 @@ func RegisterEvents(app *provider.Application) {
 			Listener: listeners.LogTenantEvent(tenant_repo),
 		},
 	})
+
+	// akan melakukan migrasi tenant
+	if provider.IntegrateWith(provider.BILLING) {
+		event_service.RegisterListeners(events.BILLING_PAID, []event.Handler{
+			{
+				Timeout:  15 * time.Minute,
+				Listener: listeners.NewTenantTierChangedListener(product_repo, infra_repo, tenant_repo, deployer_service),
+			},
+			{
+				Listener: listeners.NewActivatingTenang(tenant_repo),
+			},
+			{
+				Listener: listeners.LogTenantEvent(tenant_repo),
+			},
+		})
+	}
+	if provider.IntegrateWith(provider.IAM) {
+		// akan mengubah resource_information tenant dan membuat tenant aktif kembali
+		event_service.RegisterListeners(events.TENANT_REGISTERED, []event.Handler{
+			{
+				Listener: listeners.NewRegisteringTenantResource(tenant_repo),
+			},
+			{
+				Listener: listeners.LogTenantEvent(tenant_repo),
+			},
+		})
+	}
 	// akan melakukan destroy resource di provider
 	//event_service.RegisterListeners(events.INFRASTRUCTURE_DESTROYED, []event.Handler{
 	//	{

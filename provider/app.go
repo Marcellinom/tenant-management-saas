@@ -14,6 +14,17 @@ type Application struct {
 	i        *do.Injector
 }
 
+const (
+	BILLING = "BILLING"
+	IAM     = "IAM"
+)
+
+func IntegrateWith(module string) bool {
+	v := fmt.Sprintf("%s_INTEGRATION_MODE", module)
+	env := os.Getenv(v)
+	return env == "true" || env == "1"
+}
+
 func (a Application) Auth() *auth.Authenticator {
 	return a.auth
 }

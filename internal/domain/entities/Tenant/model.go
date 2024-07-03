@@ -5,6 +5,7 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Infrastructure"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
+	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
 
@@ -37,9 +38,31 @@ func (t *Tenant) ChangeTier(new_product_id vo.ProductId) error {
 		return fmt.Errorf("status tenant tidak aktif")
 	}
 	t.TenantStatus = TENANT_MIGRATING
+
+	if provider.IntegrateWith(provider.BILLING) {
+		return nil
+	}
+
 	t.Events["tenant_migrating_independently"] = events.NewTenantMigratingIndependently(
 		t.TenantId.String(),
 		new_product_id.String(),
+	)
+	return nil
+}
+
+func (t *Tenant) DelegateNewInfrastructure(new_infra *Infrastructure.Infrastructure) error {
+	if t.TenantStatus != TENANT_MIGRATING {
+		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
+	}
+	t.InfrastructureId = new_infra.InfrastructureId
+
+	if provider.IntegrateWith(provider.IAM) {
+		return nil
+	}
+
+	t.Events[events.TENANT_REGISTERED] = events.NewTenantResourceRegistered(
+		t.TenantId.String(),
+		new_infra.Metadata,
 	)
 	return nil
 }
@@ -50,17 +73,5 @@ func (t *Tenant) ActivateWithNewResourceInformation(resource_info []byte) error 
 	}
 	t.ResourceInformation = resource_info
 	t.TenantStatus = TENANT_ACTIVATED
-	return nil
-}
-
-func (t *Tenant) DelegateNewInfrastructure(new_infra *Infrastructure.Infrastructure) error {
-	if t.TenantStatus != TENANT_MIGRATING {
-		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
-	}
-	t.InfrastructureId = new_infra.InfrastructureId
-	t.Events[events.TENANT_REGISTERED] = events.NewTenantResourceRegistered(
-		t.TenantId.String(),
-		new_infra.Metadata,
-	)
 	return nil
 }
