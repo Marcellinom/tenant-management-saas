@@ -2,6 +2,7 @@ package listeners
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
@@ -41,17 +42,18 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("data tenant dengan id %s tidak ditemukan", payload.TenantId)
 	}
 
-	resource_info, ok := payload.ResourceInformation.(string)
-	if ok {
-		fmt.Println("RESOURCE INFO:", resource_info)
-	} else {
-		resource_info = ""
+	var resource_info []byte
+	if r, ok := payload.ResourceInformation.(string); ok {
+		resource_info, err = base64.StdEncoding.DecodeString(r)
+		if err != nil {
+			// kalo bukan b64 coba langsung encode jadi []byte
+			resource_info = []byte(r)
+		}
+		if !json.Valid(resource_info) {
+			return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(resource_info))
+		}
 	}
-	resource_info_map, ok := payload.ResourceInformation.(map[string]string)
-	if ok {
-		fmt.Println("RESOURCE INFO MAP:", resource_info_map)
-	}
-	err = tenant.ActivateWithNewResourceInformation([]byte(resource_info))
+	err = tenant.ActivateWithNewResourceInformation(resource_info)
 	if err != nil {
 		return fmt.Errorf("gagal melakukan registrasi resource tenant: %w", err)
 	}
