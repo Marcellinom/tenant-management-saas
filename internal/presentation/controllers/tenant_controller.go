@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/Marcellinom/tenant-management-saas/internal/app/commands"
 	"github.com/Marcellinom/tenant-management-saas/internal/app/queries"
+	"github.com/Marcellinom/tenant-management-saas/provider"
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -76,5 +77,7 @@ func (c TenantController) ChangeTenantTier(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	Success(ctx)
+	SuccessWithData(ctx, struct {
+		UseBilling bool `json:"use_billing"`
+	}{UseBilling: provider.IntegrateWith(provider.BILLING)})
 }
