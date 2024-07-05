@@ -40,6 +40,11 @@ func registerApis(app *provider.Application) {
 		o.POST("")
 	}
 
+	p := r.Group("/product")
+	{
+		p.GET("/:app_id/tenant/:organization_id/", tenant_controller.FindByOrganizationAndApp)
+	}
+
 	t := r.Group("/tenant")
 	{
 		t.GET("/:organization_id", tenant_controller.GetByOrganization)

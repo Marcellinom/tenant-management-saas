@@ -7,6 +7,7 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/provider/errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type TenantController struct {
@@ -80,4 +81,24 @@ func (c TenantController) ChangeTenantTier(ctx *gin.Context) {
 	SuccessWithData(ctx, struct {
 		UseBilling bool `json:"use_billing"`
 	}{UseBilling: provider.IntegrateWith(provider.BILLING)})
+}
+
+func (c TenantController) FindByOrganizationAndApp(ctx *gin.Context) {
+	orgs_id := ctx.Param("organization_id")
+	app_id := ctx.Param("app_id")
+	if orgs_id == "" || app_id == "" {
+		ctx.AbortWithError(http.StatusBadRequest, errors.BadRequest(6000, "organization id dan app id tidak boleh kosong"))
+		return
+	}
+	app, err := strconv.Atoi(app_id)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, errors.BadRequest(6000, "format app id invalid (harus int)"))
+		return
+	}
+	res, err := c.tenant_query_interface.FindByOrganizationAndAppId(orgs_id, app)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	SuccessWithData(ctx, res)
 }

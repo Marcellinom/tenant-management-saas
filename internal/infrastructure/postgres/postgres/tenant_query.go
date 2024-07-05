@@ -27,6 +27,44 @@ type tenantQueryDto struct {
 	AppName             string
 }
 
+func (t TenantQuery) FindByOrganizationAndAppId(organization_id string, app_id int) (*queries.TenantQueryResult, error) {
+	var res tenantQueryDto
+	err := t.db.Raw(`
+		select *,
+		       p.tier_name,
+		       p.app_id,
+		       (select name from apps a where a.id = p.app_id) app_name
+		       from (select 
+		                   id,
+		                   name,
+		                   status,
+		                   resource_information,
+		                   product_id
+		                   from tenants te where organization_id = ? and deleted_at is null) t
+		join products p on p.id = t.product_id and p.app_id = ?
+	`, organization_id, app_id).Take(&res).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var resource map[string]any
+	if res.ResourceInformation != nil {
+		json.Unmarshal(res.ResourceInformation, &resource)
+	}
+	return &queries.TenantQueryResult{
+		TenantId:            res.Id,
+		Name:                res.Name,
+		ResourceInformation: resource,
+		Status:              res.Status,
+		ProductId:           res.ProductId,
+		Tier:                res.Tier,
+		AppId:               res.AppId,
+		AppName:             res.AppName,
+	}, nil
+}
+
 func (t TenantQuery) GetByOrganizationId(orgs_id string) ([]queries.TenantQueryResult, error) {
 	var res []tenantQueryDto
 	err := t.db.Raw(
