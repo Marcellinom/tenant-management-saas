@@ -60,14 +60,14 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(metadata))
 	}
 
-	var metadata_map map[string]string
+	var metadata_map map[string]any
 	err = json.Unmarshal(metadata, &metadata_map)
 	if err != nil {
 		return fmt.Errorf("failed to decode metadata json: %w", err)
 	}
 
 	if v, exists := metadata_map["resource_information"]; exists {
-		resource_information = []byte(v)
+		resource_information, _ = json.Marshal(v)
 	}
 
 	err = tenant.ActivateWithNewResourceInformation(resource_information)
