@@ -8,8 +8,12 @@ import (
 )
 
 func (t *TfExecutable) Migrate(ctx context.Context, old_infrastructure_metadata, new_infrastructure_metadata []byte) error {
+	script_entrypoint := t.product_backend.GetProductConfig().GetScriptEntrypoint()
+	if script_entrypoint == "" { // no need to migrate
+		return nil
+	}
 	var err error
-	migration_script := filepath.Join(t.tenant_path, t.product_backend.GetProductConfig().GetScriptEntrypoint())
+	migration_script := filepath.Join(t.tenant_path, script_entrypoint)
 	old_infra := fmt.Sprintf("-old=%s", string(old_infrastructure_metadata))
 	new_infra := fmt.Sprintf("-new=%s", string(new_infrastructure_metadata))
 	tenant_id := fmt.Sprintf("-tenant_id=%s", t.Tf_tenant.TenantId())

@@ -109,10 +109,9 @@ func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tena
 func (s TerraformService) constructTfProductConfig(product *Product.Product) (*terraform_product.ProductConfig, error) {
 	var err error
 	var product_deployment_schema struct {
-		TfRepoUrl       string              `json:"terraform_repository_url"`
-		TfEntryPointDir string              `json:"terraform_entrypoint_dir"`
-		MigrationFile   string              `json:"migrate_entrypoint,omitempty"`
-		Infra           []map[string]string `json:"infrastructure_blueprint"`
+		TfRepoUrl       string `json:"deployment_repository_url"`
+		TfEntryPointDir string `json:"terraform_execution_path"`
+		MigrationFile   string `json:"migration_script_path,omitempty"`
 	}
 	err = json.Unmarshal(product.DeploymentSchema, &product_deployment_schema)
 	if err != nil {
