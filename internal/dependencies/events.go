@@ -35,6 +35,13 @@ func RegisterEvents(app *provider.Application) {
 		},
 	})
 
+	if provider.IntegrateWith(provider.ONBOARDING) {
+		event_service.RegisterListeners(events.TENANT_ONBOARDED, []event.Handler{
+			{
+				Listener: listeners.NewRegisteringTenantResource(tenant_repo),
+			},
+		})
+	}
 	// akan melakukan migrasi tenant
 	if provider.IntegrateWith(provider.BILLING) {
 		event_service.RegisterListeners(events.BILLING_PAID, []event.Handler{
@@ -50,17 +57,15 @@ func RegisterEvents(app *provider.Application) {
 			},
 		})
 	}
-	if provider.IntegrateWith(provider.IAM) {
-		// akan mengubah resource_information tenant dan membuat tenant aktif kembali
-		event_service.RegisterListeners(events.TENANT_REGISTERED, []event.Handler{
-			{
-				Listener: listeners.NewRegisteringTenantResource(tenant_repo),
-			},
-			{
-				Listener: listeners.LogTenantEvent(tenant_repo),
-			},
-		})
-	}
+	// akan mengubah resource_information tenant dan membuat tenant aktif kembali
+	event_service.RegisterListeners(events.TENANT_REGISTERED, []event.Handler{
+		{
+			Listener: listeners.NewRegisteringTenantResource(tenant_repo),
+		},
+		{
+			Listener: listeners.LogTenantEvent(tenant_repo),
+		},
+	})
 	// akan melakukan destroy resource di provider
 	//event_service.RegisterListeners(events.INFRASTRUCTURE_DESTROYED, []event.Handler{
 	//	{

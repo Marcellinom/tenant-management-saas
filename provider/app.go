@@ -15,8 +15,9 @@ type Application struct {
 }
 
 const (
-	BILLING = "BILLING"
-	IAM     = "IAM"
+	BILLING    = "BILLING"
+	IAM        = "IAM"
+	ONBOARDING = "ONBOARDING"
 )
 
 func IntegrateWith(module string) bool {

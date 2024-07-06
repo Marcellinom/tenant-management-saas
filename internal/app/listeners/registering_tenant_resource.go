@@ -42,18 +42,28 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 		return fmt.Errorf("data tenant dengan id %s tidak ditemukan", payload.TenantId)
 	}
 
-	var resource_info []byte
+	var metadata, resource_information []byte
 	if r, ok := payload.ResourceInformation.(string); ok {
-		resource_info, err = base64.StdEncoding.DecodeString(r)
+		metadata, err = base64.StdEncoding.DecodeString(r)
 		if err != nil {
 			// kalo bukan b64 coba langsung encode jadi []byte
-			resource_info = []byte(r)
+			metadata = []byte(r)
 		}
-		if !json.Valid(resource_info) {
-			return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(resource_info))
+		if !json.Valid(metadata) {
+			return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(metadata))
+		}
+
+		var metadata_map map[string]string
+		err = json.Unmarshal(metadata, &metadata_map)
+		if err != nil {
+			return fmt.Errorf("failed to decode metadata json: %w", err)
+		}
+
+		if v, exists := metadata_map["resource_information"]; exists {
+			resource_information = []byte(v)
 		}
 	}
-	err = tenant.ActivateWithNewResourceInformation(resource_info)
+	err = tenant.ActivateWithNewResourceInformation(resource_information)
 	if err != nil {
 		return fmt.Errorf("gagal melakukan registrasi resource tenant: %w", err)
 	}
