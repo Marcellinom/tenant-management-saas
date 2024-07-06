@@ -68,9 +68,6 @@ func (t *Tenant) DelegateNewInfrastructure(new_infra *Infrastructure.Infrastruct
 }
 
 func (t *Tenant) ActivateWithNewResourceInformation(resource_info []byte) error {
-	if t.TenantStatus != TENANT_MIGRATING {
-		return fmt.Errorf("tenant tidak dalam masa migrasi resource")
-	}
 	t.ResourceInformation = resource_info
 	t.TenantStatus = TENANT_ACTIVATED
 	return nil
