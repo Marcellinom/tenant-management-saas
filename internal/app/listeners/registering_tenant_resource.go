@@ -43,26 +43,33 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 	}
 
 	var metadata, resource_information []byte
-	if r, ok := payload.ResourceInformation.(string); ok {
-		metadata, err = base64.StdEncoding.DecodeString(r)
-		if err != nil {
-			// kalo bukan b64 coba langsung encode jadi []byte
-			metadata = []byte(r)
-		}
-		if !json.Valid(metadata) {
-			return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(metadata))
-		}
-
-		var metadata_map map[string]string
-		err = json.Unmarshal(metadata, &metadata_map)
-		if err != nil {
-			return fmt.Errorf("failed to decode metadata json: %w", err)
-		}
-
-		if v, exists := metadata_map["resource_information"]; exists {
-			resource_information = []byte(v)
-		}
+	var resource string
+	if r, ok := payload.ResourceInformation.(string); ok && r != "" {
+		resource = r
 	}
+	if r, ok := payload.Metadata.(string); ok && r != "" {
+		resource = r
+	}
+
+	metadata, err = base64.StdEncoding.DecodeString(resource)
+	if err != nil {
+		// kalo bukan b64 coba langsung encode jadi []byte
+		metadata = []byte(resource)
+	}
+	if !json.Valid(metadata) {
+		return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(metadata))
+	}
+
+	var metadata_map map[string]string
+	err = json.Unmarshal(metadata, &metadata_map)
+	if err != nil {
+		return fmt.Errorf("failed to decode metadata json: %w", err)
+	}
+
+	if v, exists := metadata_map["resource_information"]; exists {
+		resource_information = []byte(v)
+	}
+
 	err = tenant.ActivateWithNewResourceInformation(resource_information)
 	if err != nil {
 		return fmt.Errorf("gagal melakukan registrasi resource tenant: %w", err)

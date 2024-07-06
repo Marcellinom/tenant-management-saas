@@ -8,6 +8,7 @@ import (
 type TenantResourceRegistered struct {
 	TenantId            string    `json:"tenant_id"`
 	ResourceInformation any       `json:"resource_information"`
+	Metadata            any       `json:"metadata,omitempty"`
 	Timestamp           time.Time `json:"timestamp"`
 }
 
