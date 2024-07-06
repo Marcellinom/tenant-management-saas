@@ -43,7 +43,7 @@ func RegisterEvents(app *provider.Application) {
 				Listener: listeners.NewTenantTierChangedListener(product_repo, infra_repo, tenant_repo, deployer_service),
 			},
 			{
-				Listener: listeners.NewActivatingTenang(tenant_repo),
+				Listener: listeners.NewActivatingTenant(tenant_repo),
 			},
 			{
 				Listener: listeners.LogTenantEvent(tenant_repo),

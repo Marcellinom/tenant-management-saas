@@ -11,15 +11,15 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
 
-type ActivatingTenang struct {
+type ActivatingTenant struct {
 	tenant_repo repositories.TenantRepositoryInterface
 }
 
-func NewActivatingTenang(tenant_repo repositories.TenantRepositoryInterface) *ActivatingTenang {
-	return &ActivatingTenang{tenant_repo: tenant_repo}
+func NewActivatingTenant(tenant_repo repositories.TenantRepositoryInterface) *ActivatingTenant {
+	return &ActivatingTenant{tenant_repo: tenant_repo}
 }
 
-func (r ActivatingTenang) Handle(ctx context.Context, event event.Event) error {
+func (r ActivatingTenant) Handle(ctx context.Context, event event.Event) error {
 	var payload events.BillingPaid
 	json_data, err := event.JSON()
 	if err != nil {
@@ -51,10 +51,10 @@ func (r ActivatingTenang) Handle(ctx context.Context, event event.Event) error {
 	return r.tenant_repo.Persist(tenant)
 }
 
-func (r ActivatingTenang) MaxRetries() int {
+func (r ActivatingTenant) MaxRetries() int {
 	return 3
 }
 
-func (r ActivatingTenang) Name() string {
+func (r ActivatingTenant) Name() string {
 	return fmt.Sprintf("%T", r)
 }
