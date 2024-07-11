@@ -48,6 +48,9 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 	switch v := payload.ResourceInformation.(type) {
 	case map[string]any:
 		resource_information, err = json.Marshal(v)
+		if err != nil {
+			return fmt.Errorf("terjadi kesalahan dalam encoding resource information %w", err)
+		}
 	case string:
 		resource = v
 	default:
@@ -55,7 +58,14 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 
 	switch v := payload.Metadata.(type) {
 	case map[string]any:
-		resource_information, err = json.Marshal(v["resource_information"])
+		res, ok := v["resource_information"]
+		if !ok { // berarti tidak ada resource information pada metadata
+			break
+		}
+		resource_information, err = json.Marshal(res)
+		if err != nil {
+			return fmt.Errorf("terjadi kesalahan dalam encoding resource information %w", err)
+		}
 	case string:
 		resource = v
 	default:
