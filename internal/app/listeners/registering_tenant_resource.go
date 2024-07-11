@@ -44,6 +44,13 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 
 	var metadata, resource_information []byte
 	var resource string
+	if r, ok := payload.ResourceInformation.(json.RawMessage); ok {
+		err = tenant.ActivateWithNewResourceInformation(r)
+		if err != nil {
+			return fmt.Errorf("gagal melakukan registrasi resource tenant: %w", err)
+		}
+		return l.tenant_repo.Persist(tenant)
+	}
 	if r, ok := payload.ResourceInformation.(string); ok && r != "" {
 		resource = r
 	}
