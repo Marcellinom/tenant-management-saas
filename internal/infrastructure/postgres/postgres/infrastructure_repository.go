@@ -3,6 +3,7 @@ package postgres
 import (
 	"errors"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/entities/Infrastructure"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
 	"github.com/Marcellinom/tenant-management-saas/provider"
 	"gorm.io/gorm"
@@ -25,7 +26,6 @@ type infra_schema struct {
 	UserLimit       int
 	DeploymentModel string
 	Prefix          string
-	ServingUrl      string
 }
 
 func (i InfrastructureRepository) FindAvailablePoolForProduct(product_id vo.ProductId) (*Infrastructure.Infrastructure, error) {
@@ -46,7 +46,20 @@ func (i InfrastructureRepository) FindAvailablePoolForProduct(product_id vo.Prod
 	return i.construct(infra_row)
 }
 func (i InfrastructureRepository) Persist(infra *Infrastructure.Infrastructure) error {
-	i.db.Transaction(func(tx *gorm.DB) error {
+	return i.db.Transaction(func(tx *gorm.DB) error {
+
+		// event yang dihandle sebelum main persistance
+		for _, e := range infra.Events {
+			switch e.(type) {
+			case events.InfrastructureDeleted:
+				tx.Table("infrastructures").Where("id", infra.InfrastructureId.String()).
+					Updates(map[string]any{
+						"deleted_at": time.Now(),
+					})
+				return nil
+			}
+		}
+
 		var row int64
 		err := tx.Table("infrastructures").Where("id", infra.InfrastructureId.String()).
 			Count(&row).Error
@@ -70,7 +83,6 @@ func (i InfrastructureRepository) Persist(infra *Infrastructure.Infrastructure) 
 			return tx.Table("infrastructures").Create(payload).Error
 		}
 	})
-	return nil
 }
 
 func (i InfrastructureRepository) MarkDeleted(id vo.InfrastructureId) error {
@@ -104,14 +116,13 @@ func (i InfrastructureRepository) construct(infra_row infra_schema) (*Infrastruc
 	if err != nil {
 		return nil, err
 	}
-	return &Infrastructure.Infrastructure{
-		InfrastructureId: infra_id,
-		ProductId:        product_id,
-		UserCount:        infra_row.UserCount,
-		MaxUser:          infra_row.UserLimit,
-		Metadata:         infra_row.Metadata,
-		DeploymentModel:  infra_row.DeploymentModel,
-		Prefix:           infra_row.Prefix,
-		ServingUrl:       infra_row.ServingUrl,
-	}, nil
+	return Infrastructure.NewInfrastructure(
+		infra_id,
+		product_id,
+		infra_row.UserCount,
+		infra_row.UserLimit,
+		infra_row.Metadata,
+		infra_row.DeploymentModel,
+		infra_row.Prefix,
+	), nil
 }

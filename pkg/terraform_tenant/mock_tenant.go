@@ -6,7 +6,6 @@ import (
 
 func Mock() *TenantConfig {
 	return &TenantConfig{
-		tenant_id:  uuid.New().String(),
-		product_id: uuid.New().String(),
+		tenant_id: uuid.New().String(),
 	}
 }

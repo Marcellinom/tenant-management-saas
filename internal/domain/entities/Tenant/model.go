@@ -72,3 +72,9 @@ func (t *Tenant) ActivateWithNewResourceInformation(resource_info []byte) error 
 	t.TenantStatus = TENANT_ACTIVATED
 	return nil
 }
+
+func (t *Tenant) Decommission() {
+	t.Events[events.TENANT_DECOMMISSIONED] = events.NewTenantDecommissioned(
+		t.TenantId.String(),
+	)
+}

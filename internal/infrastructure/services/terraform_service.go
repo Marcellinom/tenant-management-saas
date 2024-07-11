@@ -14,6 +14,7 @@ import (
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_product"
 	"github.com/Marcellinom/tenant-management-saas/pkg/terraform_tenant"
 	"github.com/Marcellinom/tenant-management-saas/provider/event"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"os"
 )
@@ -21,14 +22,19 @@ import (
 type TerraformService struct {
 	event_service event.Service
 	infra_repo    repositories.InfrastructureRepositoryInterface
+	product_repo  repositories.ProductRepositoryInterface
 }
 
 func NewTerraformService(
 	event_service event.Service,
 	infra_repo repositories.InfrastructureRepositoryInterface,
+	product_repo repositories.ProductRepositoryInterface,
 ) *TerraformService {
-	// init terraform workspace sama copy product config dari repository
-	return &TerraformService{event_service: event_service, infra_repo: infra_repo}
+	return &TerraformService{
+		event_service: event_service,
+		infra_repo:    infra_repo,
+		product_repo:  product_repo,
+	}
 }
 
 func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tenant *Tenant.Tenant, target_product *Product.Product) error {
@@ -39,7 +45,7 @@ func (s TerraformService) MigrateTenantToTargetProduct(ctx context.Context, tena
 
 	tf, err := terraform.NewWorkspace(
 		os.Getenv("TF_WORKDIR"), os.Getenv("TF_EXECUTABLE"),
-		terraform_tenant.New(tenant.TenantId.String(), target_product.ProductId.String(), target_product.DeploymentType),
+		terraform_tenant.New(tenant.TenantId.String()),
 		terraform_product.UsingGit(product_conf),
 	)
 	if err != nil {
@@ -140,4 +146,55 @@ func (s TerraformService) postMigration(infra *Infrastructure.Infrastructure, te
 		tenant.TenantId.String(), infra.InfrastructureId.String(), infra.Metadata,
 	))
 	return nil
+}
+
+func (s TerraformService) DecommissionInfrastructure(ctx context.Context, infra *Infrastructure.Infrastructure) error {
+	product, err := s.product_repo.Find(infra.ProductId)
+	if err != nil {
+		return fmt.Errorf("terjadi kesalahan mengambil data product: %w", err)
+	}
+	if product == nil {
+		return fmt.Errorf("product dengan id %s tidak ditemukan", infra.ProductId.String())
+	}
+
+	product_conf, err := s.constructTfProductConfig(product)
+	if err != nil {
+		return fmt.Errorf("gagal membangun konfigurasi product: %w", err)
+	}
+
+	tf, err := terraform.NewWorkspace(
+		os.Getenv("TF_WORKDIR"), os.Getenv("TF_EXECUTABLE"),
+		terraform_tenant.New(uuid.NewString()),
+		terraform_product.UsingGit(product_conf),
+	)
+	if err != nil {
+		return fmt.Errorf("terjadi kesalahan dalam memroses executable terraform: %w", err)
+	}
+	tf.Tf_tenant.TenantEnv = append(tf.Tf_tenant.TenantEnv,
+		tfexec.Var(fmt.Sprintf("infrastructure_id=%s", infra.InfrastructureId.String())),
+		tfexec.Var(fmt.Sprintf("provider_id=%s", os.Getenv("GOOGLE_PROJECT_ID"))),
+	)
+	if os.Getenv("GOOGLE_CREDS_PATH") != "" {
+		tf.Tf_tenant.TenantEnv = append(tf.Tf_tenant.TenantEnv,
+			tfexec.Var(fmt.Sprintf("credentials=%s", os.Getenv("GOOGLE_CREDS_PATH"))),
+		)
+	}
+	tf.UseBackend(gcp.Backend(os.Getenv("GOOGLE_BUCKET"), infra.Prefix))
+
+	switch infra.DeploymentModel {
+	case terraform.SILO:
+		err = tf.Destroy(ctx)
+	case terraform.POOL:
+		if infra.UserCount > 0 {
+			return nil
+		}
+		err = tf.Destroy(ctx)
+	default:
+		err = fmt.Errorf("tipe deployment %s belum dapat dihandle", infra.DeploymentModel)
+	}
+	if err != nil {
+		return err
+	}
+	infra.Delete()
+	return s.infra_repo.Persist(infra)
 }

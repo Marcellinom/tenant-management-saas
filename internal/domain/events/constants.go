@@ -7,4 +7,6 @@ const (
 	TENANT_REGISTERED        = "domain_registered"
 	INFRASTRUCTURE_DESTROYED = "infrastructure_destroyed"
 	TENANT_ONBOARDED         = "tenant_onboarded"
+	TENANT_DECOMMISSIONED    = "tenant_decommissioned"
+	INFRASTRUCTURE_DELETED   = "infra_deleted"
 )

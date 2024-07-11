@@ -39,6 +39,10 @@ func (c ChangeTenantTierCommand) Execute(ctx context.Context, req ChangeTenantTi
 		return errors.Invariant(2002, "kesalahan dalam mengambil data tenant", err.Error())
 	}
 
+	if tenant == nil {
+		return errors.Invariant(2007, "data tenant tidak ditemukan")
+	}
+
 	tenant_product, err := c.product_repo.Find(tenant.ProductId)
 	if err != nil {
 		return errors.Invariant(2006, "kesalahan dalam mengambil data produk tenant", err.Error())

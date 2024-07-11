@@ -58,6 +58,23 @@ func (t TenantRepository) Find(tenant_id vo.TenantId) (*Tenant.Tenant, error) {
 
 func (t TenantRepository) Persist(tenant *Tenant.Tenant) error {
 	return t.db.Transaction(func(tx *gorm.DB) error {
+
+		// event yang dihandle sebelum main persistance
+		for _, e := range tenant.Events {
+			switch e.(type) {
+			case events.TenantDecommissioned:
+				tx.Table("tenants").Where("id", tenant.TenantId.String()).
+					Updates(map[string]any{
+						"infrastructure_id": nil,
+						"deleted_at":        time.Now(),
+					})
+				t.event_service.Dispatch(events.INFRASTRUCTURE_DESTROYED, events.NewInfrastructureDestroyed(
+					tenant.InfrastructureId.String(),
+				))
+				return nil
+			}
+		}
+
 		var row int64
 		err := tx.Table("tenants").Where("id", tenant.TenantId.String()).
 			Count(&row).Error
@@ -92,6 +109,8 @@ func (t TenantRepository) Persist(tenant *Tenant.Tenant) error {
 				tenant.Name,
 				tenant.TenantStatus,
 			))
+			// mesti dilakukan terakhir
+			// supaya jika ada gagal diatas, gk kepublish
 			for event_name, e := range tenant.Events {
 				t.event_service.Dispatch(event_name, e)
 			}

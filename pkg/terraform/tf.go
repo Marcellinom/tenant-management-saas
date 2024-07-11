@@ -45,12 +45,17 @@ func NewWorkspace(tf_working_dir, tf_executable string, tenant *terraform_tenant
 		return nil, fmt.Errorf("gagal dalam mereset folder tenant: %w", err)
 	}
 
-	err = tf.initProduct()
-	if err != nil {
-		return nil, err
+	var product_entry_point string
+	// defaults to /tenants/{tenant_id}/
+	if product_backend != nil {
+		err = tf.initProduct()
+		if err != nil {
+			return nil, err
+		}
+		product_entry_point = product_backend.GetProductConfig().GetTfEntrypoint()
 	}
 
-	tf_exec, err := tfexec.NewTerraform(filepath.Join(tenant_path, product_backend.GetProductConfig().GetTfEntrypoint()), tf_executable)
+	tf_exec, err := tfexec.NewTerraform(filepath.Join(tenant_path, product_entry_point), tf_executable)
 	if err != nil {
 		return nil, fmt.Errorf("gagal menjalankan terraform executable: %w", err)
 	}

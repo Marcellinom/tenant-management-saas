@@ -2,7 +2,9 @@ package Infrastructure
 
 import (
 	"fmt"
+	"github.com/Marcellinom/tenant-management-saas/internal/domain/events"
 	"github.com/Marcellinom/tenant-management-saas/internal/domain/vo"
+	"github.com/Marcellinom/tenant-management-saas/provider/event"
 )
 
 type Infrastructure struct {
@@ -14,7 +16,27 @@ type Infrastructure struct {
 	DeploymentModel  string              `json:"deployment_model"`
 	Prefix           string              `json:"prefix"` // prefix buat nyimpen tfstate nya di remote
 
-	ServingUrl string `json:"serving_url"`
+	Events map[string]event.Event
+}
+
+func NewInfrastructure(
+	infrastructureId vo.InfrastructureId,
+	productId vo.ProductId,
+	userCount int,
+	maxUser int,
+	metadata []byte,
+	deploymentModel string,
+	prefix string) *Infrastructure {
+	return &Infrastructure{
+		InfrastructureId: infrastructureId,
+		ProductId:        productId,
+		UserCount:        userCount,
+		MaxUser:          maxUser,
+		Metadata:         metadata,
+		DeploymentModel:  deploymentModel,
+		Prefix:           prefix,
+		Events:           make(map[string]event.Event),
+	}
 }
 
 func CreatePoolConfig(product_id vo.ProductId) *Infrastructure {
@@ -39,4 +61,8 @@ func CreateSiloConfig(product_id vo.ProductId) *Infrastructure {
 		DeploymentModel:  "silo",
 		Prefix:           fmt.Sprintf("infrastructures/%s", infra_id.String()),
 	}
+}
+
+func (i *Infrastructure) Delete() {
+	i.Events[events.INFRASTRUCTURE_DELETED] = events.NewInfrastructureDeleted(i.InfrastructureId.String())
 }

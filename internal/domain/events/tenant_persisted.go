@@ -21,8 +21,8 @@ func NewTenantPersisted(
 	organizationId string,
 	infrastructureId string,
 	name string,
-	tenantStatus string) *TenantPersisted {
-	return &TenantPersisted{
+	tenantStatus string) TenantPersisted {
+	return TenantPersisted{
 		TenantId:         tenantId,
 		ProductId:        productId,
 		OrganizationId:   organizationId,

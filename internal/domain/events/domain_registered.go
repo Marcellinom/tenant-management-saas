@@ -13,8 +13,8 @@ type DomainRegistered struct {
 	Timestamp      time.Time `json:"timestamp"`
 }
 
-func NewDomainRegistered(appId int, tenantId string, organizationId string, domainUrl string) *DomainRegistered {
-	return &DomainRegistered{AppId: appId, TenantId: tenantId, OrganizationId: organizationId, DomainUrl: domainUrl, Timestamp: time.Now()}
+func NewDomainRegistered(appId int, tenantId string, organizationId string, domainUrl string) DomainRegistered {
+	return DomainRegistered{AppId: appId, TenantId: tenantId, OrganizationId: organizationId, DomainUrl: domainUrl, Timestamp: time.Now()}
 }
 
 func (t DomainRegistered) OccuredOn() time.Time {

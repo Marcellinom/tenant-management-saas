@@ -14,10 +14,21 @@ type TenantController struct {
 	create_tenant_cm       *commands.CreateTenantCommand
 	change_tenant_tier_cm  *commands.ChangeTenantTierCommand
 	tenant_query_interface queries.TenantQueryInterface
+	decommission_tenant_cm *commands.DecommissionTenantCommand
 }
 
-func NewTenantController(create_tenant_cm *commands.CreateTenantCommand, change_tenant_tier_cm *commands.ChangeTenantTierCommand, tenant_query_interface queries.TenantQueryInterface) *TenantController {
-	return &TenantController{create_tenant_cm: create_tenant_cm, change_tenant_tier_cm: change_tenant_tier_cm, tenant_query_interface: tenant_query_interface}
+func NewTenantController(
+	create_tenant_cm *commands.CreateTenantCommand,
+	change_tenant_tier_cm *commands.ChangeTenantTierCommand,
+	tenant_query_interface queries.TenantQueryInterface,
+	decommission_tenant *commands.DecommissionTenantCommand,
+) *TenantController {
+	return &TenantController{
+		create_tenant_cm:       create_tenant_cm,
+		change_tenant_tier_cm:  change_tenant_tier_cm,
+		tenant_query_interface: tenant_query_interface,
+		decommission_tenant_cm: decommission_tenant,
+	}
 }
 
 func (c TenantController) GetByOrganization(ctx *gin.Context) {
@@ -101,4 +112,19 @@ func (c TenantController) FindByOrganizationAndApp(ctx *gin.Context) {
 		return
 	}
 	SuccessWithData(ctx, res)
+}
+
+func (c TenantController) Decommission(ctx *gin.Context) {
+	var req commands.DecommissionTenantRequest
+	var err error
+	if err = ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	if err = c.decommission_tenant_cm.Execute(req); err != nil {
+		ctx.Error(err)
+	} else {
+		Success(ctx)
+	}
 }

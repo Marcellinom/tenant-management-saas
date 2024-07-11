@@ -19,6 +19,7 @@ func registerApis(app *provider.Application) {
 		commands.NewCreateTenantCommand(tenant_repo),
 		commands.NewChangeTenantTierCommand(tenant_repo, product_repo, event_service),
 		tenant_query,
+		commands.NewDecommissionTenantCommand(tenant_repo),
 	)
 
 	organization_query := provider.Make[*iam.OrganizationQuery](app)
@@ -52,5 +53,7 @@ func registerApis(app *provider.Application) {
 
 		t.POST("", tenant_controller.CreateTenant)
 		t.POST("/change_tier", tenant_controller.ChangeTenantTier)
+
+		t.PATCH("/decommission", tenant_controller.Decommission)
 	}
 }
