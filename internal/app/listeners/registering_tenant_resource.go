@@ -44,37 +44,42 @@ func (l RegisteringTenantResource) Handle(ctx context.Context, event event.Event
 
 	var metadata, resource_information []byte
 	var resource string
-	if r, ok := payload.ResourceInformation.(json.RawMessage); ok {
-		err = tenant.ActivateWithNewResourceInformation(r)
+
+	switch v := payload.ResourceInformation.(type) {
+	case map[string]any:
+		resource_information, err = json.Marshal(v)
+	case string:
+		resource = v
+	default:
+	}
+
+	switch v := payload.Metadata.(type) {
+	case map[string]any:
+		resource_information, err = json.Marshal(v["resource_information"])
+	case string:
+		resource = v
+	default:
+	}
+
+	if resource != "" {
+		metadata, err = base64.StdEncoding.DecodeString(resource)
 		if err != nil {
-			return fmt.Errorf("gagal melakukan registrasi resource tenant: %w", err)
+			// kalo bukan b64 coba langsung encode jadi []byte
+			metadata = []byte(resource)
 		}
-		return l.tenant_repo.Persist(tenant)
-	}
-	if r, ok := payload.ResourceInformation.(string); ok && r != "" {
-		resource = r
-	}
-	if r, ok := payload.Metadata.(string); ok && r != "" {
-		resource = r
-	}
+		if !json.Valid(metadata) {
+			return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(metadata))
+		}
 
-	metadata, err = base64.StdEncoding.DecodeString(resource)
-	if err != nil {
-		// kalo bukan b64 coba langsung encode jadi []byte
-		metadata = []byte(resource)
-	}
-	if !json.Valid(metadata) {
-		return fmt.Errorf("invalid json format saat registrasi tenant resource: %s", string(metadata))
-	}
+		var metadata_map map[string]any
+		err = json.Unmarshal(metadata, &metadata_map)
+		if err != nil {
+			return fmt.Errorf("failed to decode metadata json: %w", err)
+		}
 
-	var metadata_map map[string]any
-	err = json.Unmarshal(metadata, &metadata_map)
-	if err != nil {
-		return fmt.Errorf("failed to decode metadata json: %w", err)
-	}
-
-	if v, exists := metadata_map["resource_information"]; exists {
-		resource_information, _ = json.Marshal(v)
+		if v, exists := metadata_map["resource_information"]; exists {
+			resource_information, _ = json.Marshal(v)
+		}
 	}
 
 	err = tenant.ActivateWithNewResourceInformation(resource_information)
