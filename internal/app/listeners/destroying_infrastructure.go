@@ -42,7 +42,9 @@ func (l DestroyingInfrastructureListener) Handle(ctx context.Context, event even
 		return fmt.Errorf("terjadi kesalahan dalam parsing id infrastructure (wants uuid, get %s)", payload.InfrastructureId)
 	}
 	infra, err := l.infra_repo.Find(infra_id)
-
+	if infra == nil {
+		return fmt.Errorf("infrastructure dengan id %s tidak ditemukan", infra_id.String())
+	}
 	return l.deployer_service.DecommissionInfrastructure(ctx, infra)
 }
 

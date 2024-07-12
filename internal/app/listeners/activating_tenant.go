@@ -39,6 +39,9 @@ func (r ActivatingTenant) Handle(ctx context.Context, event event.Event) error {
 	if err != nil {
 		return fmt.Errorf("gagal mengambil data tenant: %w", err)
 	}
+	if tenant == nil {
+		return fmt.Errorf("id tenant %s tidak ditemukan", tenant_id.String())
+	}
 	// bila statusnya migrating berarti tenantnya bayar buat ganti tier
 	// bukan buat ngaktifin tenant, makanya bisa skip proses listener ini
 	if tenant.TenantStatus == Tenant.TENANT_MIGRATING {
